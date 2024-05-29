@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +18,33 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+/*
+|--------------------------------------------------------------------------
+| manager Routes
+|--------------------------------------------------------------------------
+|
+| 管理者権限のルート
+|
+*/
+Route::prefix('manager')
+    ->middleware('can:manager-higher')->group(function () {
+        Route::resource('events', EventController::class);
+    });
+/*
+|--------------------------------------------------------------------------
+| manager Routes
+|--------------------------------------------------------------------------
+|
+| 利用者権限のルート
+|
+*/
+Route::middleware('can:user-higher')->group(function () {
+    Route::get('index', function () {
+        dd('user');
+    });
+});
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');
