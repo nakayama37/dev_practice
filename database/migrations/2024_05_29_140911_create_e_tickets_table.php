@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('e_tickets', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->tinyInteger('role');
-            $table->rememberToken();
+            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('ticket_sale_id');
+            $table->string('ticket_number', 255);
+            $table->string('qr_code', 255);
+            $table->dateTime('issued_at');
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('e_tickets');
     }
 };

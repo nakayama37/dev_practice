@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('tickets', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->tinyInteger('role');
-            $table->rememberToken();
+            $table->unsignedInteger('event_id');
+            $table->enum('type', ['GA', 'VIP']);
+            $table->unsignedDecimal('price', $precision = 10, $scale = 2)->default(0);
+            $table->unsignedInteger('quantity')->default(0);
+            $table->boolean('is_paid')->default(false);
             $table->timestamps();
         });
     }
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('tickets');
     }
 };
