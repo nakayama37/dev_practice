@@ -15,6 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @can('manager-higher')
+                    <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
+                        イベント管理
+                    </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -70,6 +75,11 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @can('manager-higher')
+            <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('event.index')">
+                イベント管理
+            </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->
