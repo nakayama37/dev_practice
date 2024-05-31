@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreEventRequest;
 use App\Models\Event;
 use App\Services\EventService;
@@ -15,20 +14,21 @@ class EventController extends Controller
     /**
      * イベント管理画面一覧
      * 
-     * @return void
+     * @return view
      */
     public function index()
     {
-        $events = DB::table('events')
-        ->orderBy('start_at', 'asc')
-        ->paginate(10);
+        $eventModel = new Event();
+        // 全てのイベント取得
+        $events = $eventModel->getEvents();
+      
         return view('manager.events.index', compact('events'));
     }
 
     /**
      * イベント作成画面
      * 
-     * @return void
+     * @return view
      */
     public function create()
     {
@@ -40,7 +40,7 @@ class EventController extends Controller
      * イベント登録
      * 
      * @param $request
-     * @return void
+     * @return view
      */
     public function store(StoreEventRequest $request)
     {
@@ -59,15 +59,26 @@ class EventController extends Controller
         session()->flash('status', 'イベントを登録しました');
 
         return to_route('events.index');
-        
+
     }
 
     /**
-     * Display the specified resource.
+     * イベント詳細画面
+     * 
+     * @param $event
+     * @return view
      */
-    public function show(string $id)
+    public function show(Event $event)
     {
-        //
+        // イベント情報取得
+        $event = Event::findOrFail($event->id);
+
+        // アクセサでフォーマットされた日付を取得
+        $eventDate = $event->eventDate;
+        $startTime = $event->startTime;
+        $endTime = $event->endTime;
+
+        return view('manager.events.show', compact('event', 'eventDate', 'startTime', 'endTime'));
     }
 
     /**

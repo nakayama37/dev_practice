@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Carbon\Carbon;
+
 
 class Event extends Model
 {
@@ -45,6 +48,69 @@ class Event extends Model
     // }
 
     /**
+     * イベント日付のフォーマット
+     * @param  void
+     * @return $eventDate
+     */
+    protected function eventDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::parse($this->start_at)->format('Y年m月d日')
+        );
+    }
+
+    /**
+     * イベント開始時間のフォーマット
+     * @param  void
+     * @return $startTime
+     */
+    protected function startTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::parse($this->start_at)->format('H時i分')
+        );
+    }
+
+    /**
+     * イベント終了時間のフォーマット
+     * @param  void
+     * @return $startTime
+     */
+    protected function endTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::parse($this->end_at)->format('H時i分')
+        );
+    }
+
+    /**
+     * イベント一覧取得
+     * @param  void
+     * @return $events
+     */
+    public function getEvents()
+    {
+
+        DB::beginTransaction();
+        try {
+
+            $events = Event::
+              orderBy('start_at', 'asc')
+            ->paginate(10);
+
+            DB::commit();
+
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("イベント一覧取得時にエラーが発生しました。エラー内容は下記です。登録内容:", $events);
+            \Log::error($e);
+        }
+
+        return $events;
+    }
+
+    /**
      * イベント作成
      * @param  $request, $userId, $startDate, $endDate
      * @return void
@@ -54,6 +120,7 @@ class Event extends Model
 
         DB::beginTransaction();
         try {
+
             Event::create([
                 'user_id' => $user_id,
                 'title' => $request['title'],
@@ -62,14 +129,20 @@ class Event extends Model
                 'end_at' => $endDate,
                 'max_people' => $request['max_people'],
                 'is_public' => $request['is_public'],
-            ]);     
+            ]); 
+
             DB::commit();
+
         } catch (Throwable $e) {
             DB::rollBack();
+
             \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
             \Log::error($e);
+
         }
+
         return;
+
     }
 
 
