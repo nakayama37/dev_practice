@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use App\Http\Requests\StoreEventRequest;
+use App\Models\Event;
+use App\Services\EventService;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
+
     /**
-     * Display a listing of the resource.
+     * イベント管理画面一覧
+     * 
+     * @return void
      */
     public function index()
     {
@@ -20,7 +26,9 @@ class EventController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * イベント作成画面
+     * 
+     * @return void
      */
     public function create()
     {
@@ -29,11 +37,29 @@ class EventController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * イベント登録
+     * 
+     * @param $request
+     * @return void
      */
-    public function store(Request $request)
+    public function store(StoreEventRequest $request)
     {
-        //
+        // 現在認証しているユーザーのIDを取得
+        $user_id = Auth::id();
+
+        // 日付と時間を結合
+        $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
+        $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
+
+        // イベントの作成
+        $eventModel = new Event();
+        $eventModel->createEvent($request, $user_id, $startDate, $endDate);
+
+        // 登録成功のセッション
+        session()->flash('status', 'イベントを登録しました');
+
+        return to_route('events.index');
+        
     }
 
     /**

@@ -26,7 +26,6 @@ class EventFactory extends Factory
         'user_id' => 2,
         'title' => $this->faker->word,
         'content' => $this->faker->realText,
-        'location' => $this->faker->address,
         'start_at' => $dummyDate->format('Y-m-d H:i:s'),
         'end_at' => $dummyDate->modify('+1hour')->format('Y-m-d H:i:s'),
         'max_people' => $this->faker->numberBetween(1, 20),

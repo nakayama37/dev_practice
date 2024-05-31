@@ -256,6 +256,13 @@ return [
         'updated_at' => '更新日',
         'username' => 'ユーザー名',
         'year' => '年',
+
+
+        'title' => 'イベント名',
+        'content' => 'イベント詳細',
+        'start_at' => '開始時間',
+        'end_at' => '終了時間',
+        'max_people' => '定員'
     ],
 
 ];

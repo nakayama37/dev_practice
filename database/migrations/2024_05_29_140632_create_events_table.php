@@ -16,7 +16,6 @@ return new class extends Migration
             $table->unsignedInteger('user_id');
             $table->string('title', 255);
             $table->text('content');
-            $table->string('location', 255);
             $table->dateTime('start_at');
             $table->dateTime('end_at');
             $table->unsignedInteger('max_people')->default(0);
