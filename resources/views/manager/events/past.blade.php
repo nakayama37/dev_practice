@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            イベント管理
+            過去のイベント一覧
         </h2>
     </x-slot>
 
@@ -14,10 +14,6 @@
                         
                         <!-- Session Status -->
                         <x-success-session-status class="mb-4" :status="session('status')" />
-                        <div class="flex justify-between">
-                          <button onclick="location.href='{{ route('events.past') }}'" class="flex ml-auto mb-4 text-white bg-green-500 border-0 py-2 px-6 focus:outline-none hover:bg-green-600 rounded">過去のイベント一覧</button>
-                          <button onclick="location.href='{{ route('events.create') }}'" class="flex ml-auto mb-4 text-white bg-indigo-500 border-0 py-2 px-6 focus:outline-none hover:bg-indigo-600 rounded">イベント作成</button>
-                        </div>
 
                         <div class="w-full mx-auto overflow-auto">
                           <table class="table-auto w-full text-left whitespace-no-wrap">

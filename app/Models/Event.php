@@ -47,6 +47,13 @@ class Event extends Model
     //     return $this->belongsTo(DvsEbook::class, 'ebook_id');
     // }
 
+    public function __construct()
+    {  
+        // 本日の日付を取得
+        $this->today = Carbon::today();
+
+    }
+
     /**
      * イベント日付のフォーマット
      * @param  void
@@ -91,23 +98,28 @@ class Event extends Model
     public function getEvents()
     {
 
-        DB::beginTransaction();
-        try {
-
-            $events = Event::
-              orderBy('start_at', 'asc')
-            ->paginate(10);
-
-            DB::commit();
-
-        } catch (Throwable $e) {
-            DB::rollBack();
-
-            \Log::error("イベント一覧取得時にエラーが発生しました。エラー内容は下記です。登録内容:", $events);
-            \Log::error($e);
-        }
+        $events = Event::
+        whereDate('start_at', '>=',  $this->today)
+        ->orderBy('start_at', 'asc')
+        ->paginate(10);
 
         return $events;
+    }
+    /**
+     * 過去イベント一覧取得
+     * @param  void
+     * @return $events
+     */
+    public function getPastEvents()
+    {
+        
+        $events = Event::
+        whereDate('start_at', '<',  $this->today)
+        ->orderBy('start_at', 'desc')
+        ->paginate(10);
+
+        return $events;
+
     }
 
     /**
@@ -130,6 +142,38 @@ class Event extends Model
                 'max_people' => $request['max_people'],
                 'is_public' => $request['is_public'],
             ]); 
+
+            DB::commit();
+
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error($e);
+
+        }
+
+        return;
+
+    }
+    /**
+     * イベント編集
+     * @param  $request, $event, $userId, $startDate, $endDate
+     * @return void
+     */
+    public function updateEvent($request, $event, $user_id, $startDate, $endDate)
+    {
+
+        DB::beginTransaction();
+        try {
+                $event->user_id = $user_id;
+                $event->title = $request['title'];
+                $event->content = $request['content'];
+                $event->start_at = $startDate;
+                $event->end_at = $endDate;
+                $event->max_people = $request['max_people'];
+                $event->is_public = $request['is_public'];
+                $event->save();
 
             DB::commit();
 

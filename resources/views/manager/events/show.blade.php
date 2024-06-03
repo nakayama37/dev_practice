@@ -24,11 +24,11 @@
                           <div class="md:flex justify-start mt-4">
                             <div>
                               <x-input-label for="event_date" value="イベント日付" />
-                              {{ $event->eventDate }}
+                              {{ $event->eventDate }}/
                             </div>
                             <div class="mx-2">
                               <x-input-label for="start_at" value="開始時間" />
-                              {{ $event->startTime }}
+                              {{ $event->startTime }}/
                             </div>
                             <div>
                               <x-input-label for="end_at" value="終了時間" />
@@ -41,9 +41,9 @@
                           </div>
                           <div class="my-4">
                             @if($event->is_public)
-                              表示中
+                            <span class="text-green-500">表示中</span>
                             @else
-                              非表示
+                            <span class="text-red-500">非表示</span>
                             @endif
                           </div>
                           <div>
@@ -52,11 +52,12 @@
                           </div>
 
                         </div>
-                       
+                        {{-- 過去のイベントの場合非表示 --}}
+                        @if($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日'))
                           <x-primary-button class="ms-3">
                               イベント編集
                           </x-primary-button>
-                       
+                        @endif
                       </div>
                     </section>
                  </form>

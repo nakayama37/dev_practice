@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Services\EventService;
 use Illuminate\Support\Facades\Auth;
@@ -82,19 +83,64 @@ class EventController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * イベント編集画面
+     * 
+     * @param $event
+     * @return view
      */
-    public function edit(string $id)
+    public function edit(Event $event)
     {
-        //
+        // イベント情報取得
+        $event = Event::findOrFail($event->id);
+        
+        // アクセサでフォーマットされた日付を取得
+        $eventDate = $event->eventDate;
+        $startTime = $event->startTime;
+        $endTime = $event->endTime;
+
+        return view('manager.events.edit', compact('event', 'eventDate', 'startTime', 'endTime'));
     }
 
     /**
-     * Update the specified resource in storage.
+     * イベント編集
+     * 
+     * @param $request
+     * @return view
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateEventRequest $request, Event $event)
     {
-        //
+        // 現在認証しているユーザーのIDを取得
+        $user_id = Auth::id();
+
+        // 日付と時間を結合
+        $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
+        $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
+
+        // イベントの作成
+        $eventModel = new Event();
+        // イベント情報取得
+        $event = Event::findOrFail($event->id);
+        $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate);
+
+        // 登録成功のセッション
+        session()->flash('status', 'イベントを更新しました');
+
+        return to_route('events.index');
+    }
+
+    /**
+     * 過去イベント一覧
+     * 
+     * @return view
+     */
+    public function past()
+    {
+
+        $eventModel = new Event();
+        // 過去のイベント取得
+        $events = $eventModel->getPastEvents();
+
+        return view('manager.events.past', compact('events'));
     }
 
     /**
