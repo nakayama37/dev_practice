@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('participants', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('event_id');
-            $table->unsignedInteger('user_id');
+            $table->foreignId('event_id')->constrained()->onUpdate('cascade');
+            $table->foreignId('user_id')->constrained()->onUpdate('cascade');
             $table->unsignedInteger('number_of_people')->default(0);
             $table->boolean('is_checked_in')->default(false);
             $table->dateTime('checked_in_at')->nullable();

@@ -22,7 +22,7 @@ class EventController extends Controller
         $eventModel = new Event();
         // 全てのイベント取得
         $events = $eventModel->getEvents();
-      
+
         return view('manager.events.index', compact('events'));
     }
 
@@ -74,12 +74,26 @@ class EventController extends Controller
         // イベント情報取得
         $event = Event::findOrFail($event->id);
 
+        $users = $event->users;
+        
+        $participants = [];
+
+        foreach ($users as $user) {
+            $participant = [
+                'name' => $user->name,
+                'number_of_people' => $user->pivot->number_of_people,
+                'canceled_at' => $user->pivot->canceled_at
+            ];
+
+            array_push($participants, $participant);
+        }
+
         // アクセサでフォーマットされた日付を取得
         $eventDate = $event->eventDate;
         $startTime = $event->startTime;
         $endTime = $event->endTime;
 
-        return view('manager.events.show', compact('event', 'eventDate', 'startTime', 'endTime'));
+        return view('manager.events.show', compact('event', 'users', 'participants', 'eventDate', 'startTime', 'endTime'));
     }
 
     /**

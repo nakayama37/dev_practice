@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Carbon\Carbon;
+use App\Models\User;
 
 
 class Event extends Model
@@ -39,19 +40,12 @@ class Event extends Model
     ];
 
     /**
-     * Relation App\Models\DvsEbook
-     * @return belongsTo
+     * Relation App\Models\User
+     * @return belongsToMany
      */
-    // public function dvsEbookFiles()
-    // {
-    //     return $this->belongsTo(DvsEbook::class, 'ebook_id');
-    // }
-
-    public function __construct()
-    {  
-        // 本日の日付を取得
-        $this->today = Carbon::today();
-
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'participants')->withPivot('id','number_of_people', 'is_checked_in', 'checked_in_at', 'canceled_at' );
     }
 
     /**
@@ -97,9 +91,18 @@ class Event extends Model
      */
     public function getEvents()
     {
+        $today = Carbon::today();
+
+        $participants = DB::table('participants')
+        ->select('event_id', DB::raw('sum(number_of_people) as number_of_people'))
+        ->whereNull('canceled_at')
+        ->groupBy('event_id');
 
         $events = Event::
-        whereDate('start_at', '>=',  $this->today)
+        leftJoinSub($participants, 'participants', function ($join) {
+            $join->on('events.id', '=', 'participants.event_id');
+        })
+        ->whereDate('start_at', '>=',  $today)
         ->orderBy('start_at', 'asc')
         ->paginate(10);
 
@@ -112,9 +115,18 @@ class Event extends Model
      */
     public function getPastEvents()
     {
-        
+        $today = Carbon::today();
+
+        $participants = DB::table('participants')
+        ->select('event_id', DB::raw('sum(number_of_people) as number_of_people'))
+        ->whereNull('canceled_at')
+        ->groupBy('event_id');
+
         $events = Event::
-        whereDate('start_at', '<',  $this->today)
+        leftJoinSub($participants, 'participants', function ($join) {
+            $join->on('events.id', '=', 'participants.event_id');
+        })
+        ->whereDate('start_at', '<',  $today)
         ->orderBy('start_at', 'desc')
         ->paginate(10);
 

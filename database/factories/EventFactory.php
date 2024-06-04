@@ -9,10 +9,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class EventFactory extends Factory
 {
-  /**
-   * The current password being used by the factory.
-   */
-  protected static ?string $password;
 
   /**
    * Define the model's default state.
@@ -34,13 +30,5 @@ class EventFactory extends Factory
       ];
   }
 
-  /**
-   * Indicate that the model's email address should be unverified.
-   */
-  public function unverified(): static
-  {
-    return $this->state(fn (array $attributes) => [
-      'email_verified_at' => null,
-    ]);
-  }
+
 }

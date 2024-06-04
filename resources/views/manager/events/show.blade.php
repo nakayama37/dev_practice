@@ -5,7 +5,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="pt-4 pb-2">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -61,6 +61,35 @@
                       </div>
                     </section>
                  </form>
+            </div>
+        </div>
+      </div>
+      <div class="py-4">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                  @if(!$users->isEmpty())
+                   <div class="text-center py-2">参加状況</div>
+                     <table class="table-auto w-full text-left whitespace-no-wrap">
+                        <thead>
+                          <tr>
+                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">参加者名</th>
+                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">参加人数</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach ($participants as $participant)
+                          @if(is_null($participant['canceled_at']))
+                          <tr>
+                            <td class="px-4 py-3"> {{ $participant['name'] }}</td>
+                            <td class="px-4 py-3"> {{ $participant['number_of_people'] }}</td>
+                          </tr>
+                           @endif
+                           @endforeach
+                        </tbody>
+                     </table>
+                  @endif
+                </div>
             </div>
         </div>
       </div>

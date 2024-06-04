@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Event;
 
 class User extends Authenticatable
 {
@@ -43,4 +44,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /**
+     * Relation App\Models\Event
+     * @return belongsToMany
+     */
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'participants')->withPivot('id', 'number_of_people', 'is_checked_in', 'checked_in_at', 'canceled_at');
+    }
 }
