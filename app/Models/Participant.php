@@ -30,5 +30,32 @@ class Participant extends Model
         'canceled_at',        // キャンセル日
     ];
 
+    /**
+     * イベント参加
+     * @param  $user_id, $event_id
+     * @return void
+     */
+    public function joinEvent($user_id, $event_id)
+    {
+
+        DB::beginTransaction();
+        try {
+
+            Participant::create([
+                'event_id' => $event_id,
+                'user_id' => $user_id,
+                
+            ]);
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error($e);
+        }
+
+        return;
+    }
 
 }

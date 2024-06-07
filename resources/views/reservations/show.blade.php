@@ -11,7 +11,9 @@
                 <div class="p-6 text-gray-900">
                    <!-- エラーメッセージ -->
                   <x-error-message/>
-                  <form method="GET" action="{{ route('events.edit', ['event' => $event->id ]) }}">
+                  <form method="POST" action="{{ route('reservations.join') }}">
+                     @csrf
+                    <input type="hidden" name="event_id" value="{{ $event->id }}">
                     <section class="text-gray-600 body-font">
                       <div class="container mx-auto flex px-5 py-12 items-center justify-center flex-col">
                         @if(is_null($event->image))           
@@ -49,6 +51,7 @@
                             <span class="text-red-500">非表示</span>
                             @endif
                           </div>
+                          
                           <div>
                             <x-input-label for="content" value="イベント詳細" />
                             <p class="mb-8 leading-relaxed"> {!! nl2br(e($event->content))  !!}</p>
@@ -58,7 +61,7 @@
                         {{-- 過去のイベントの場合非表示 --}}
                         @if($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日'))
                           <x-primary-button class="ms-3">
-                              イベント編集
+                              イベント参加
                           </x-primary-button>
                         @endif
                       </div>

@@ -14,17 +14,29 @@
                   <!-- エラーメッセージ -->
                    <x-error-message/>
 
-                    <form method="POST" action="{{ route('events.store') }}">
+                    <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <div>
+                            <x-input-label for="image" value="イベント画像" />
+                            <x-text-input id="image" class="block mt-1 w-full" type="file" name="image"/>
+                        </div>
+                        <div class="mt-4">
+                            <x-input-label for="category" value="カテゴリー" />
+                           <select id="category" name="category" class="block w-full sm:w-2/3 bg-gray-200 py-2 px-3 text-gray-700 border border-gray-200 rounded focus:outline-none focus:bg-white">
+                            @foreach($categories as $category)
+                              <option name="category" value="{{ $category->id }}">{{ $category->name}} </option>
+                            @endforeach
+                          </select>
+                        </div>
+                        <div class="mt-4">
                             <x-input-label for="title" value="イベント名" />
                             <x-text-input id="title" class="block mt-1 w-full" type="text" name="title" :value="old('title')" required autofocus/>
                         </div>
 
                         <div class="mt-4">
                             <x-input-label for="content" value="イベント詳細" />
-                            <x-textarea id="content" class="block mt-1 w-full" type="text" name="content" :value="old('content')" />
+                            <x-textarea id="content" class="block mt-1 w-full" type="text" name="content" :value="old('content')" /></textarea>
                           
                         </div>
 
@@ -47,7 +59,7 @@
                         <div class="md:flex justify-between items-end">
                           <div class="mt-4">
                             <x-input-label for="max_people" value="定員数" />
-                            <x-text-input id="max_people" class="block mt-1 w-full" type="number" name="max_people" required />
+                            <x-text-input id="max_people" accept="image/png, image/jpeg, image/jpg" class="block mt-1 w-full" type="number" name="max_people" required />
                           </div>
                           <div class="flex space-x-4 justify-around">
                             <input type="radio" name="is_public" value="1" checked >表示

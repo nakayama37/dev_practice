@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Category;
 
 
 class Event extends Model
@@ -46,6 +47,15 @@ class Event extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'participants')->withPivot('id','number_of_people', 'is_checked_in', 'checked_in_at', 'canceled_at' );
+    }
+    
+    /**
+     * Relation App\Models\Category
+     * @return belongsToMany
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'event_categories');
     }
 
     /**
@@ -137,23 +147,24 @@ class Event extends Model
     /**
      * イベント作成
      * @param  $request, $userId, $startDate, $endDate
-     * @return void
+     * @return $eventId
      */
-    public function createEvent($request, $user_id, $startDate, $endDate)
+    public function createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore)
     {
 
         DB::beginTransaction();
         try {
 
-            Event::create([
-                'user_id' => $user_id,
-                'title' => $request['title'],
-                'content' => $request['content'],
-                'start_at' => $startDate,
-                'end_at' => $endDate,
-                'max_people' => $request['max_people'],
-                'is_public' => $request['is_public'],
-            ]); 
+              $event = Event::create([
+                            'user_id' => $user_id,
+                            'title' => $request['title'],
+                            'content' => $request['content'],
+                            'start_at' => $startDate,
+                            'end_at' => $endDate,
+                            'max_people' => $request['max_people'],
+                            'image' => $fileNameToStore,
+                            'is_public' => $request['is_public'],
+                        ]); 
 
             DB::commit();
 
@@ -165,7 +176,7 @@ class Event extends Model
 
         }
 
-        return;
+        return $event->id;
 
     }
     /**

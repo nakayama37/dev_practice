@@ -13,30 +13,12 @@
         {{-- <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         <!-- Scripts -->
         <script src="{{ asset('js/app.js') }}"></script> --}}
-        <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.1/tailwindcss.js"></script>
-        <script src="//unpkg.com/alpinejs" defer></script>
         @vite(['resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/flatpickr.js'
                 ])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-orange-50">
-            @include('layouts.navigation')
-
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
-
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
+      トップ
     </body>
 </html>

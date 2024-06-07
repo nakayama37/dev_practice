@@ -41,7 +41,7 @@
                                   @if(is_null($event->number_of_people))
                                    0              
                                   @else
-                                   ({{ $event->number_of_people }})         
+                                   {{ $event->number_of_people }}         
                                   @endif
                                 </td>              
                                 <td class="px-4 py-3">{{ $event->max_people }}</td>          
