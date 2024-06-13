@@ -36,5 +36,13 @@
                 {{ $slot }}
             </main>
         </div>
+        <script>
+        'use strict';
+        function cancelPost(e) {
+          if(confirm('本当にキャンセルしてもよろしいですか？')) {
+            document.getElementById('cancel_'+ e.dataset.id).submit();
+          }
+        }
+      </script>
     </body>
 </html>

@@ -23,6 +23,11 @@
                         イベント管理
                     </x-nav-link>
                     @endcan
+                    @can('admin')
+                    <x-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
+                        カテゴリー管理
+                    </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -84,6 +89,11 @@
             @can('manager-higher')
             <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('event.index')">
                 イベント管理
+            </x-responsive-nav-link>
+            @endcan
+            @can('admin')
+            <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.index')">
+                カテゴリー管理
             </x-responsive-nav-link>
             @endcan
         </div>

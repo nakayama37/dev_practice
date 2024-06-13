@@ -5,6 +5,8 @@ use Illuminate\Database\Capsule\Manager;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyPageController;
+use App\Http\Controllers\CategoryController;
+use App\Models\Category;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +17,23 @@ use App\Http\Controllers\MyPageController;
 |
 */
 Route::get('/', [EventController::class, 'welcome'])->name('welcome');
+/*
+|--------------------------------------------------------------------------
+| manager Routes
+|--------------------------------------------------------------------------
+|
+| 管理者以上権限のルート
+|
+*/
+Route::prefix('admin')
+    ->middleware('can:admin')->group(function () {
+        Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
+        Route::get('categories/{category}', [CategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('categories/{category}', [CategoryController::class, 'toggle'])->name('categories.public.toggle');
+       
+    });
 /*
 |--------------------------------------------------------------------------
 | manager Routes

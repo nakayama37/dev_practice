@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
+            $table->boolean('is_public')->default(true);
             $table->timestamps();
         });
     }
