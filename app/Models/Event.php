@@ -108,7 +108,7 @@ class Event extends Model
         ->whereNull('canceled_at')
         ->groupBy('event_id');
 
-        $events = Event::
+        $events = self::
         leftJoinSub($participants, 'participants', function ($join) {
             $join->on('events.id', '=', 'participants.event_id');
         })
@@ -132,7 +132,7 @@ class Event extends Model
         ->whereNull('canceled_at')
         ->groupBy('event_id');
 
-        $events = Event::
+        $events = self::
         leftJoinSub($participants, 'participants', function ($join) {
             $join->on('events.id', '=', 'participants.event_id');
         })
@@ -145,8 +145,28 @@ class Event extends Model
     }
 
     /**
+     * 予約可能な人数取得
+     * @param  $eventId
+     * @return $reservedPeople
+     */
+    public function getReservedPeople($eventId)
+    {
+
+        $reservedPeople = DB::table('participants')
+        ->select('event_id', DB::raw('sum(number_of_people) as number_of_people'))
+        ->whereNull('canceled_at')
+        ->groupBy('event_id')
+        ->having('event_id', $eventId)
+        ->first();
+
+
+        return $reservedPeople;
+    }
+   
+
+    /**
      * イベント作成
-     * @param  $request, $userId, $startDate, $endDate
+     * @param  $request, $userId, $startDate, $endDate, $fileNameToStore
      * @return $eventId
      */
     public function createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore)
@@ -155,7 +175,7 @@ class Event extends Model
         DB::beginTransaction();
         try {
 
-              $event = Event::create([
+              $event = self::create([
                             'user_id' => $user_id,
                             'title' => $request['title'],
                             'content' => $request['content'],

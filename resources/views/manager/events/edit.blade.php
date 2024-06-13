@@ -46,7 +46,7 @@
                         <div class="md:flex justify-between items-end">
                           <div class="mt-4">
                             <x-input-label for="max_people" value="定員数" />
-                            <x-text-input id="max_people" class="block mt-1 w-full" type="number" name="max_people" value="{{ $event->max_people }}" required />
+                            <x-text-input id="max_people" class="block mt-1 w-full" type="number" name="max_people" value="{{ $event->max_people }}" required min="1"/>
                           </div>
                           <div class="flex space-x-4 justify-around">
                             <input type="radio" name="is_public" value="1" @if($event->is_public === 1) { checked } @endif  >表示

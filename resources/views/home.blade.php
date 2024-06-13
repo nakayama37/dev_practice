@@ -1,4 +1,7 @@
 <x-app-layout>
+  <!-- Session Status -->
+  <x-success-session-status class="mb-4" :status="session('status')" />
+
 	 @foreach ($categories as $category)  
     <div class="my-12 text-center">
       <h2 class="text-2xl font-semibold text-gray-800">{{ $category->name }}</h2>
@@ -7,6 +10,7 @@
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="overflow-x-scroll scrollbar-hide mb-4 relative px-0.5" style="overflow-y: hidden;">
 	      <div class="flex snap-x snap-mandatory gap-4" style="width: max-content;">
+
 		   @foreach ($category->events as $event) 
 			<div class="cursor-pointer flex-none w-64 snap-center" onclick="location.href='{{ route('reservations.detail', [ 'event' => $event->id ]) }}'" >
 				<div class="bg-white border-1 border border-gray-200 rounded-lg overflow-hidden mb-4">
@@ -36,6 +40,7 @@
 				</div>
 			</div>
 		  @endforeach
+      
 	    </div>
       </div>
      </div>

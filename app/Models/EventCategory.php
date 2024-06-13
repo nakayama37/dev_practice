@@ -39,7 +39,7 @@ class EventCategory extends Model
         DB::beginTransaction();
         try {
 
-            EventCategory::create([
+            self::create([
                 'event_id' => $eventId,
                 'category_id' => $eventCategoryId,
                 

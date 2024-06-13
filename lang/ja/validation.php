@@ -257,12 +257,13 @@ return [
         'username' => 'ユーザー名',
         'year' => '年',
 
-
+        // 追記
         'title' => 'イベント名',
         'content' => 'イベント詳細',
         'start_at' => '開始時間',
         'end_at' => '終了時間',
-        'max_people' => '定員'
+        'max_people' => '定員',
+        'number_of_people' => '参加人数'
     ],
 
 ];

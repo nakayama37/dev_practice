@@ -52,7 +52,7 @@ class Category extends Model
         ->groupBy('event_id');
 
 
-        $categories = Category::with(['events' => function ($query) use ($today, $participants) {
+        $categories = self::with(['events' => function ($query) use ($today, $participants) {
             $query->leftJoinSub($participants, 'participants', function ($join) {
                 $join->on('events.id', '=', 'participants.event_id');
             })

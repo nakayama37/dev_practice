@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\EventController;
-use Illuminate\Database\Capsule\Manager;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Database\Capsule\Manager;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MyPageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,10 +17,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::get('/', [EventController::class, 'welcome'])->name('welcome');
 /*
 |--------------------------------------------------------------------------
 | manager Routes
@@ -43,14 +41,13 @@ Route::prefix('manager')
 */
  Route::middleware('can:user-higher')->group(function () {
     Route::get('/home', [EventController::class, 'home'])->name('home');
+    Route::get('/mypage', [MyPageController::class, 'index'])->name('mypage.index');
+    Route::get('/mypage/{id}', [MyPageController::class, 'show'])->name('mypage.show');
+    Route::post('/mypage/{id}', [MyPageController::class, 'cancel'])->name('mypage.cancel');
     Route::get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
     Route::post('/reservations', [EventController::class, 'join'])->name('reservations.join');
 });
 
-
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

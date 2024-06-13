@@ -10,9 +10,7 @@
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        {{-- <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-        <!-- Scripts -->
-        <script src="{{ asset('js/app.js') }}"></script> --}}
+       
         <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.1/tailwindcss.js"></script>
         <script src="//unpkg.com/alpinejs" defer></script>
         @vite(['resources/css/app.css',

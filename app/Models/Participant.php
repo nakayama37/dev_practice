@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class Participant extends Model
 {
@@ -31,31 +34,97 @@ class Participant extends Model
     ];
 
     /**
+     * イベント参加者を取得
+     * @param  $id イベントID
+     * @return $reservation
+     */
+    public function getEventParticipant($id)
+    {
+        $reservation = Participant::where('user_id', '=', Auth::id())
+        ->where('event_id', '=', $id)
+        ->latest()
+        ->first();
+
+        return $reservation;
+
+    }
+    /**
+     * 参加者数を集計
+     * @param  $event_id
+     * @return $participantCount
+     */
+    public function participantCount($event_id)
+    {
+        $participantCount = self::where('event_id', $event_id)->sum('number_of_people');
+        return $participantCount;
+    }
+
+    /**
      * イベント参加
      * @param  $user_id, $event_id
      * @return void
      */
-    public function joinEvent($user_id, $event_id)
+    public function joinEvent($user_id, $request)
     {
 
         DB::beginTransaction();
         try {
 
-            Participant::create([
-                'event_id' => $event_id,
-                'user_id' => $user_id,
+            // すでに同じイベントに参加しているか確認
+            $exists = self::where('user_id', $user_id)
+                ->where('event_id', $request['event_id'])
+                ->whereNull('canceled_at')
+                ->exists();
+
+            if ($exists) {
+
+                return false; // すでに参加している場合
+
+            } else {
                 
-            ]);
+                self::create([
+                    'event_id' => $request['event_id'],
+                    'user_id' => $user_id,
+                    'number_of_people' => $request['number_of_people'],
+                    
+                ]);
+
+            }
+
 
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error("イベント参加登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
             \Log::error($e);
         }
 
-        return;
+        return true;
+    }
+    /**
+     * イベントキャンセル
+     * @param  $reservation
+     * @return void
+     */
+    public function cancel($reservation)
+    {
+
+        DB::beginTransaction();
+        try {
+
+            $reservation->canceled_at = Carbon::now()->format('Y-m-d H:i:s');
+            $reservation->save();
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("イベントキャンセル時にエラーが発生しました。エラー内容は下記です。登録内容:", $reservation);
+            \Log::error($e);
+        }
+
+        return true;
     }
 
 }

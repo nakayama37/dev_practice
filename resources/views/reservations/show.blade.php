@@ -13,7 +13,6 @@
                   <x-error-message/>
                   <form method="POST" action="{{ route('reservations.join') }}">
                      @csrf
-                    <input type="hidden" name="event_id" value="{{ $event->id }}">
                     <section class="text-gray-600 body-font">
                       <div class="container mx-auto flex px-5 py-12 items-center justify-center flex-col">
                         @if(is_null($event->image))           
@@ -29,73 +28,58 @@
                           <div class="md:flex justify-start mt-4">
                             <div>
                               <x-input-label for="event_date" value="イベント日付" />
-                              {{ $event->eventDate }}/
+                              {{ $eventDate }}/
                             </div>
                             <div class="mx-2">
                               <x-input-label for="start_at" value="開始時間" />
-                              {{ $event->startTime }}/
+                              {{ $startTime }}/
                             </div>
                             <div>
                               <x-input-label for="end_at" value="終了時間" />
-                              {{ $event->endTime }}
+                              {{ $endTime }}
                             </div>
                           </div>
-                          <div class="my-4">
-                            <x-input-label for="max_people" value="定員数" />
-                            {{ $event->max_people }}
+                          <div class="md:flex justify-start mt-4">
+                            <div>
+                              <x-input-label for="max_people" value="定員数" />
+                              {{ $event->max_people }}
+                            </div>
+                            <div class="mx-4">
+                              <x-input-label for="number_of_people" value="現在のイベント参加者数" />
+                              {{ $participantCount }}
+                              </div>
+                             <div>
+                                <x-input-label for="reservablePeople" value="参加可能人数" />
+                                {{ $reservablePeople }}
+                             </div>
                           </div>
-                          <div class="my-4">
-                            @if($event->is_public)
-                            <span class="text-green-500">表示中</span>
-                            @else
-                            <span class="text-red-500">非表示</span>
-                            @endif
-                          </div>
-                          
-                          <div>
+                          <div class="mt-4">
                             <x-input-label for="content" value="イベント詳細" />
                             <p class="mb-8 leading-relaxed"> {!! nl2br(e($event->content))  !!}</p>
                           </div>
-
-                        </div>
-                        {{-- 過去のイベントの場合非表示 --}}
-                        @if($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日'))
-                          <x-primary-button class="ms-3">
-                              イベント参加
-                          </x-primary-button>
-                        @endif
+                          @if($reservablePeople <= 0)
+                            <span class="text-lg text-red-500">このイベントは満員です</span>
+                            @else
+                            <div class="mt-4">
+                              <x-input-label for="number_of_people" value="参加人数" />
+                              <x-text-input id="number_of_people"  class="block mt-1" type="number" name="number_of_people" required min="1"/>
+                            </div>
+                            </div>
+                            <input type="hidden" name="event_id" value="{{ $event->id }}">
+                            @if($isReserved === null)
+                            {{-- 過去のイベントの場合非表示 --}}
+                              @if($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日') || $event->max_people > $participantCount)
+                              <x-primary-button class="ms-3">
+                                イベント参加
+                                </x-primary-button>
+                              @endif
+                            @else
+                            <span class="text-lg text-red-500">このイベントは既に予約済みです</span>
+                            @endif
+                          @endif
                       </div>
                     </section>
                  </form>
-            </div>
-        </div>
-      </div>
-      <div class="py-4">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                  @if(!$users->isEmpty())
-                   <div class="text-center py-2">参加状況</div>
-                     <table class="table-auto w-full text-left whitespace-no-wrap">
-                        <thead>
-                          <tr>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">参加者名</th>
-                            <th class="px-4 py-3 title-font tracking-wider font-medium text-gray-900 text-sm bg-gray-100">参加人数</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($participants as $participant)
-                          @if(is_null($participant['canceled_at']))
-                          <tr>
-                            <td class="px-4 py-3"> {{ $participant['name'] }}</td>
-                            <td class="px-4 py-3"> {{ $participant['number_of_people'] }}</td>
-                          </tr>
-                           @endif
-                           @endforeach
-                        </tbody>
-                     </table>
-                  @endif
-                </div>
             </div>
         </div>
       </div>

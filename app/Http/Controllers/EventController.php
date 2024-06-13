@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
 use App\Models\Category;
@@ -28,6 +29,17 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function welcome()
+    {
+        $categoryModel = new Category();
+        // 全てのイベント取得
+        $categories = $categoryModel->getEvents();
+
+        return view('welcome', compact('categories'));
+    }
+    /**
+     * Display a listing of the resource.
+     */
     public function home()
     {
         $categoryModel = new Category();
@@ -48,26 +60,33 @@ class EventController extends Controller
         // イベント情報取得
         $event = Event::findOrFail($event->id);
 
-        $users = $event->users;
-
-        $participants = [];
-
-        foreach ($users as $user) {
-            $participant = [
-                'name' => $user->name,
-                'number_of_people' => $user->pivot->number_of_people,
-                'canceled_at' => $user->pivot->canceled_at
-            ];
-
-            array_push($participants, $participant);
+        $eventModel = new Event();
+        // イベント参加人数を集計・算出
+        $reservedPeople = $eventModel->getReservedPeople($event->id);
+        // 予約が入っている場合、定員 ー 参加人数
+        if(!is_null($reservedPeople)){
+            $reservablePeople = $event->max_people - $reservedPeople->number_of_people;
+        } else {
+        // 予約が入っていない場合、定員
+            $reservablePeople = $event->max_people;
         }
+
+        $isReserved = Participant::where('user_id', '=', Auth::id())
+        ->where('event_id', '=', $event->id)
+        ->where('canceled_at', '=', null)
+        ->latest()
+        ->first();
 
         // アクセサでフォーマットされた日付を取得
         $eventDate = $event->eventDate;
         $startTime = $event->startTime;
         $endTime = $event->endTime;
 
-        return view('reservations.show', compact('event', 'users', 'participants', 'eventDate', 'startTime', 'endTime'));
+        // イベント参加者数を集計
+        $participantModel = new Participant();
+        $participantCount = $participantModel->participantCount($event->id);
+
+        return view('reservations.show', compact('event', 'eventDate', 'startTime', 'endTime', 'participantCount', 'reservablePeople', 'isReserved'));
       
     }
 
@@ -77,26 +96,41 @@ class EventController extends Controller
      * @param $request
      * @return view
      */
-    public function join(Request $request)
+    public function join(StoreParticipantRequest $request)
     {
-
-        dd($request);
+        // 変数宣言
+        $reservablePeople = 0;
         // 現在認証しているユーザーのIDを取得
         $user_id = Auth::id();
-       
+        // イベント情報取得
+        $event = Event::findOrFail($request['event_id']);
+        $eventModel = new Event();
+        // イベント参加人数を集計・算出
+        $reservedPeople = $eventModel->getReservedPeople($request['event_id']);
+        // イベント参加者がいる場合
+        if(!is_null($reservedPeople)) {
+            // イベント参加可能人数
+            $reservablePeople = $event->max_people - $reservedPeople->number_of_people;
+            // イベントが参加可能且つ、リクエスト参加人数が参加可能人数以下の場合、登録
+                if($reservablePeople > 0 && $reservablePeople >= $request['number_of_people']) {
+                    // イベント参加登録
+                     EventService::join($user_id, $request);
+                    
+                } else {
+                    // 定員オーバーの場合、登録しない
+                    session()->flash('status', '登録できませんでした。定員オーバーです');
+    
+                    return to_route('home');
+                } 
 
-        $participantModel = new Participant();
+            } else {
+                    // イベント参加者がいない場合
+                    // イベント参加登録
+                    EventService::join($user_id, $request);
+            }
 
-        // // イベント参加の作成
-        $participantModel->joinEvent($user_id, $request['event_id']);
+        return to_route('home');
 
-        // // イベントカテゴリーの作成
-        // $eventCategoryModel->createEventCategory($eventId, $request['category']);
-
-        // 登録成功のセッション
-        session()->flash('status', 'イベントを登録しました');
-
-        return to_route('events.index');
     }
 
  /*
