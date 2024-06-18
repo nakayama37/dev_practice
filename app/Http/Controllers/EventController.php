@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateEventRequest;
+use App\Models\User;
 use App\Models\Event;
 use App\Models\Category;
 use App\Models\EventCategory;
@@ -16,6 +17,68 @@ use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
+
+    /*
+|--------------------------------------------------------------------------
+| 利用者のみ権限のコントローラー
+|--------------------------------------------------------------------------
+| createByOnlyUser
+|
+*/
+
+    /**
+     * イベント作成画面
+     * 
+     * @return view
+     */
+    public function createByOnlyUser()
+    {
+        $categories = Category::all();
+        return view('user.events.create', compact('categories'));
+    }
+
+
+    /**
+     * イベント登録
+     * 
+     * @param $request
+     * @return view
+     */
+    public function storeByOnlyUser(StoreEventRequest $request)
+    {
+        // 現在認証しているユーザーのIDを取得
+        $user_id = Auth::id();
+        $imageFile = $request['image'];
+        $fileNameToStore = null;
+
+        $userModel = new User();
+        $eventModel = new Event();
+        $eventCategoryModel = new EventCategory();
+
+        // 主催者登録
+        $user = User::findOrFail($user_id);
+        $userModel->joinManager($user);
+
+        // 日付と時間を結合
+        $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
+        $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
+
+        //画像をストレージへ保存 
+        if (!is_null($imageFile) && $imageFile->isValid()) {
+            $fileNameToStore = ImageService::upload($imageFile, 'events');
+        }
+
+        // イベントの作成
+        $eventId =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
+
+        // イベントカテゴリーの作成
+        $eventCategoryModel->createEventCategory($eventId, $request['category']);
+
+        // 登録成功のセッション
+        session()->flash('status', 'イベントを登録しました');
+
+        return to_route('events.index');
+    }
 /*
 |--------------------------------------------------------------------------
 | 利用者以上権限のコントローラー
@@ -23,19 +86,26 @@ class EventController extends Controller
 | welcome
 | home
 | detail
+| join
 |
 */
 
     /**
      * Display a listing of the resource.
      */
-    public function welcome()
+    public function welcome(Request $request)
     {
         $categoryModel = new Category();
         // 全てのイベント取得
         $categories = $categoryModel->getEvents();
 
-        return view('welcome', compact('categories'));
+        if ($request->ajax()) {
+            return view('welcome', compact('categories'))->render();
+        } else {
+            return view('welcome', compact('categories'));
+
+        }
+
     }
     /**
      * Display a listing of the resource.
@@ -77,6 +147,11 @@ class EventController extends Controller
         ->latest()
         ->first();
 
+        // イベントに対する全てのいいね数を取得
+        $likeCount = $event->likes()->count();
+        $liked = $event->likes()->where('user_id', Auth::id())->exists();
+        // dd($likeCount);
+
         // アクセサでフォーマットされた日付を取得
         $eventDate = $event->eventDate;
         $startTime = $event->startTime;
@@ -86,7 +161,7 @@ class EventController extends Controller
         $participantModel = new Participant();
         $participantCount = $participantModel->participantCount($event->id);
 
-        return view('reservations.show', compact('event', 'eventDate', 'startTime', 'endTime', 'participantCount', 'reservablePeople', 'isReserved'));
+        return view('reservations.show', compact('event', 'eventDate', 'startTime', 'endTime', 'participantCount', 'reservablePeople', 'isReserved', 'likeCount','liked'));
       
     }
 

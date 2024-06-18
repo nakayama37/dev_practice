@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 
 
 class CategoryController extends Controller
@@ -63,16 +64,31 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        dd($category);
         // イベント情報取得
-        $event = Event::findOrFail($id);
+        $category = Category::findOrFail($category->id);
 
-        // アクセサでフォーマットされた日付を取得
-        $eventDate = $event->eventDate;
-        $startTime = $event->startTime;
-        $endTime = $event->endTime;
+        return view('admin.categories.edit', compact('category'));
+    }
 
-        return view('manager.events.edit', compact('event', 'eventDate', 'startTime', 'endTime'));
+    /**
+     * カテゴリー編集
+     * 
+     * @param $request
+     * @return view
+     */
+    public function update(UpdateCategoryRequest $request, Category $category)
+    {
+
+        // イベントの作成
+        $categoryModel = new Category();
+        // イベント情報取得
+        $category = Category::findOrFail($category->id);
+        $categoryModel->updateCategory($request, $category);
+
+        // 登録成功のセッション
+        session()->flash('status', 'カテゴリーを更新しました');
+
+        return to_route('categories.index');
     }
 
     /**

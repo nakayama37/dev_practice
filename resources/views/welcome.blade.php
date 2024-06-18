@@ -44,7 +44,7 @@
            <div class="min-h-screen bg-orange-50">
             <!-- Session Status -->
             <x-success-session-status class="mb-4" :status="session('status')" />
-
+            <div >          
             @foreach ($categories as $category)  
               <div class="py-16 text-center">
                 <h2 class="text-2xl font-semibold text-gray-800">{{ $category->name }}</h2>
@@ -55,7 +55,7 @@
                   <div class="flex snap-x snap-mandatory gap-4" style="width: max-content;">
 
                 @foreach ($category->events as $event) 
-                <div class="cursor-pointer flex-none w-64 snap-center" onclick="location.href='{{ route('reservations.detail', [ 'event' => $event->id ]) }}'" >
+                <div class="cursor-pointer flex-none w-64 snap-center post" onclick="location.href='{{ route('reservations.detail', [ 'event' => $event->id ]) }}'" >
                   <div class="bg-white border-1 border border-gray-200 rounded-lg overflow-hidden mb-4">
                     @if(is_null($event->image))   
                     <img src="{{ asset('storage/events/No_Image.png') }}" alt="" class="w-full h-40 object-cover">
@@ -89,6 +89,8 @@
               </div>
               </div>
             @endforeach 
+            </div>
         </div>
+       
     </body>
 </html>

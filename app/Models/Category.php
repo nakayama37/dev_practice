@@ -107,6 +107,31 @@ class Category extends Model
     }
 
     /**
+     * カテゴリー編集
+     * @param  $request, $category
+     * @return void
+     */
+    public function updateCategory($request, $category)
+    {
+
+        DB::beginTransaction();
+        try {
+            $category->name = $request['name'];
+            $category->save();
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("カテゴリー編集時にエラーが発生しました。エラー内容は下記です。編集内容:", $request);
+            \Log::error($e);
+        }
+
+        return;
+    }
+
+
+    /**
      * カテゴリー公開、非公開変更
      * @param  $caategory, $id
      * @return void

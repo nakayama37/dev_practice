@@ -34,5 +34,9 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('user-higher', function($user){ 
         return $user->role > 0 && $user->role <= 9; 
         });
+        // 利用者のみ
+        Gate::define('user-only', function($user){ 
+        return $user->role >= 9; 
+        });
     }
 }

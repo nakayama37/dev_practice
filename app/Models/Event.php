@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Category;
+use App\Models\Like;
 
 
 class Event extends Model
@@ -56,6 +57,15 @@ class Event extends Model
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'event_categories');
+    }
+
+    /**
+     * Relation App\Models\Like
+     * @return hasMany
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
     }
 
     /**

@@ -6,7 +6,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyPageController;
 use App\Http\Controllers\CategoryController;
-use App\Models\Category;
+use App\Http\Controllers\LikeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +19,7 @@ use App\Models\Category;
 Route::get('/', [EventController::class, 'welcome'])->name('welcome');
 /*
 |--------------------------------------------------------------------------
-| manager Routes
+| admin Routes
 |--------------------------------------------------------------------------
 |
 | 管理者以上権限のルート
@@ -32,6 +32,7 @@ Route::prefix('admin')
         Route::get('categories/create', [CategoryController::class, 'create'])->name('categories.create');
         Route::get('categories/{category}', [CategoryController::class, 'edit'])->name('categories.edit');
         Route::put('categories/{category}', [CategoryController::class, 'toggle'])->name('categories.public.toggle');
+        Route::post('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
        
     });
 /*
@@ -49,7 +50,7 @@ Route::prefix('manager')
     });
 /*
 |--------------------------------------------------------------------------
-| manager Routes
+| user Routes
 |--------------------------------------------------------------------------
 |
 | 利用者以上権限のルート
@@ -61,6 +62,20 @@ Route::prefix('manager')
     Route::get('/mypage/{id}', [MyPageController::class, 'show'])->name('mypage.show');
     Route::post('/mypage/{id}', [MyPageController::class, 'cancel'])->name('mypage.cancel');
     Route::post('/reservations', [EventController::class, 'join'])->name('reservations.join');
+    Route::post('/events/{event}/like', [LikeController::class, 'toggleLike'])->name('events.like');
+});
+/*
+|--------------------------------------------------------------------------
+| user-only Routes
+|--------------------------------------------------------------------------
+|
+| 利用者のみ権限のルート
+|
+*/
+ Route::prefix('user')
+    ->middleware('can:user-only')->group(function () {
+        Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
+        Route::post('/events', [EventController::class, 'storeByOnlyUser'])->name('user.events.store');
 });
 
 /*

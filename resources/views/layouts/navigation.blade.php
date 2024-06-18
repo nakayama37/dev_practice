@@ -18,6 +18,11 @@
                     <x-nav-link :href="route('mypage.index')" :active="request()->routeIs('mypage.index')">
                         マイページ
                     </x-nav-link>
+                    @can('user-only')
+                    <x-primary-button class="my-4" onclick="location.href='{{ route('user.events.create') }}'">
+                        イベントを作成する
+                    </x-primary-button>
+                     @endcan
                     @can('manager-higher')
                     <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
                         イベント管理
@@ -86,6 +91,11 @@
             <x-responsive-nav-link :href="route('mypage.index')" :active="request()->routeIs('mypage.index')">
                 マイページ
             </x-responsive-nav-link>
+            @can('user-only')
+            <x-primary-button class="my-4" onclick="location.href='{{ route('user.events.create') }}'">
+                イベントを作成する
+            </x-primary-button>
+            @endcan
             @can('manager-higher')
             <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('event.index')">
                 イベント管理
