@@ -36,9 +36,10 @@ class EventController extends Controller
      */
     public function search(Request $request)
     {
-        $categoryId = $request->input('category');
+        // dd($request);
+        // $categoryId = $request->input('category');
         $eventModel = new Event();
-        $events = $eventModel->search($categoryId);
+        $events = $eventModel->search($request);
        
         return response()->json($events);
         

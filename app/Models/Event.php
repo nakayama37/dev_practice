@@ -178,30 +178,72 @@ class Event extends Model
      * @param  $categoryId
      * @return $events
      */
-    public function search($categoryId)
+    public function search($request)
     {
         $query = Event::query();
 
-        // 公開中かつ本日以降のイベントを取得
-        $query->where('is_public', true);
-        // To do 本日以降の日付のイベントを作った後にコメントイン
-            // ->where('start_at', '>=', Carbon::today());
+        // キーワード検索
+        if ($request->filled('keyword')) {
+            $query->where('title', 'like', '%' . $request->keyword . '%')
+                ->orWhere('content', 'like', '%' . $request->keyword . '%');
+        }
 
-        if ($categoryId) {
-            $query->whereHas('categories', function ($q) use ($categoryId) {
-                $q->where('category_id', $categoryId);
+        // カテゴリ検索
+        if ($request->filled('category_id')) {
+            $query->whereHas('categories', function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
             });
         }
 
-        $events = $query->with('categories')->get();
+        // イベント日付検索
+        if ($request->filled('event_date')) {
+            $query->whereDate('start_at', $request->event_date);
+        }
 
+        // 公開中のみ取得
+        $query->where('is_public', true);
+
+        // 今日以降のイベントのみ取得
+        // $query->where('event_date', '>=', now());
+
+        $events = $query->with('categories')->get();
         $events->transform(function ($event) {
+            $event->event_date = $event->eventDate;
             $event->route = route('reservations.detail', ['event' => $event->id]);
             return $event;
         });
 
         return $events;
     }
+    // /**
+    //  * イベント検索取得
+    //  * @param  $categoryId
+    //  * @return $events
+    //  */
+    // public function search($categoryId)
+    // {
+    //     $query = Event::query();
+
+    //     // 公開中かつ本日以降のイベントを取得
+    //     $query->where('is_public', true);
+    //     // To do 本日以降の日付のイベントを作った後にコメントイン
+    //         // ->where('start_at', '>=', Carbon::today());
+
+    //     if ($categoryId) {
+    //         $query->whereHas('categories', function ($q) use ($categoryId) {
+    //             $q->where('category_id', $categoryId);
+    //         });
+    //     }
+
+    //     $events = $query->with('categories')->get();
+
+    //     $events->transform(function ($event) {
+    //         $event->route = route('reservations.detail', ['event' => $event->id]);
+    //         return $event;
+    //     });
+
+    //     return $events;
+    // }
     /**
      * イベント作成
      * @param  $request, $userId, $startDate, $endDate, $fileNameToStore
