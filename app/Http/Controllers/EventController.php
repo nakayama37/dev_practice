@@ -18,6 +18,32 @@ use Illuminate\Support\Facades\Auth;
 class EventController extends Controller
 {
 
+    /**
+     * イベント検索画面
+     * 
+     * @return view
+     */
+    public function searchIndex()
+    {
+        $categories = Category::all();
+        $events = Event::with('categories')->where('is_public', true)->paginate(20);
+        return view('search.index', compact('categories', 'events'));
+    }
+    /**
+     * イベント検索画面
+     * 
+     * @return view
+     */
+    public function search(Request $request)
+    {
+        $categoryId = $request->input('category');
+        $eventModel = new Event();
+        $events = $eventModel->search($categoryId);
+       
+        return response()->json($events);
+        
+    }
+
     /*
 |--------------------------------------------------------------------------
 | 利用者のみ権限のコントローラー
@@ -79,7 +105,7 @@ class EventController extends Controller
 
         return to_route('events.index');
     }
-/*
+    /*
 |--------------------------------------------------------------------------
 | 利用者以上権限のコントローラー
 |--------------------------------------------------------------------------
@@ -103,9 +129,7 @@ class EventController extends Controller
             return view('welcome', compact('categories'))->render();
         } else {
             return view('welcome', compact('categories'));
-
         }
-
     }
     /**
      * Display a listing of the resource.
@@ -134,18 +158,18 @@ class EventController extends Controller
         // イベント参加人数を集計・算出
         $reservedPeople = $eventModel->getReservedPeople($event->id);
         // 予約が入っている場合、定員 ー 参加人数
-        if(!is_null($reservedPeople)){
+        if (!is_null($reservedPeople)) {
             $reservablePeople = $event->max_people - $reservedPeople->number_of_people;
         } else {
-        // 予約が入っていない場合、定員
+            // 予約が入っていない場合、定員
             $reservablePeople = $event->max_people;
         }
 
         $isReserved = Participant::where('user_id', '=', Auth::id())
-        ->where('event_id', '=', $event->id)
-        ->where('canceled_at', '=', null)
-        ->latest()
-        ->first();
+            ->where('event_id', '=', $event->id)
+            ->where('canceled_at', '=', null)
+            ->latest()
+            ->first();
 
         // イベントに対する全てのいいね数を取得
         $likeCount = $event->likes()->count();
@@ -161,8 +185,7 @@ class EventController extends Controller
         $participantModel = new Participant();
         $participantCount = $participantModel->participantCount($event->id);
 
-        return view('reservations.show', compact('event', 'eventDate', 'startTime', 'endTime', 'participantCount', 'reservablePeople', 'isReserved', 'likeCount','liked'));
-      
+        return view('reservations.show', compact('event', 'eventDate', 'startTime', 'endTime', 'participantCount', 'reservablePeople', 'isReserved', 'likeCount', 'liked'));
     }
 
     /**
@@ -183,32 +206,29 @@ class EventController extends Controller
         // イベント参加人数を集計・算出
         $reservedPeople = $eventModel->getReservedPeople($request['event_id']);
         // イベント参加者がいる場合
-        if(!is_null($reservedPeople)) {
+        if (!is_null($reservedPeople)) {
             // イベント参加可能人数
             $reservablePeople = $event->max_people - $reservedPeople->number_of_people;
             // イベントが参加可能且つ、リクエスト参加人数が参加可能人数以下の場合、登録
-                if($reservablePeople > 0 && $reservablePeople >= $request['number_of_people']) {
-                    // イベント参加登録
-                     EventService::join($user_id, $request);
-                    
-                } else {
-                    // 定員オーバーの場合、登録しない
-                    session()->flash('status', '登録できませんでした。定員オーバーです');
-    
-                    return to_route('home');
-                } 
-
+            if ($reservablePeople > 0 && $reservablePeople >= $request['number_of_people']) {
+                // イベント参加登録
+                EventService::join($user_id, $request);
             } else {
-                    // イベント参加者がいない場合
-                    // イベント参加登録
-                    EventService::join($user_id, $request);
+                // 定員オーバーの場合、登録しない
+                session()->flash('status', '登録できませんでした。定員オーバーです');
+
+                return to_route('home');
             }
+        } else {
+            // イベント参加者がいない場合
+            // イベント参加登録
+            EventService::join($user_id, $request);
+        }
 
         return to_route('home');
-
     }
 
- /*
+    /*
 |--------------------------------------------------------------------------
 | 管理者以上権限のコントローラー
 |--------------------------------------------------------------------------
@@ -229,13 +249,12 @@ class EventController extends Controller
      */
     public function index()
     {
-        
+
         $eventModel = new Event();
         // 全てのイベント取得
         $events = $eventModel->getEvents();
 
         return view('manager.events.index', compact('events'));
-
     }
 
     /**
@@ -247,7 +266,6 @@ class EventController extends Controller
     {
         $categories = Category::all();
         return view('manager.events.create', compact('categories'));
-
     }
 
     /**
@@ -269,8 +287,8 @@ class EventController extends Controller
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
 
         //画像をストレージへ保存 
-        if(!is_null($imageFile) && $imageFile->isValid() ) {
-          $fileNameToStore = ImageService::upload($imageFile, 'events');
+        if (!is_null($imageFile) && $imageFile->isValid()) {
+            $fileNameToStore = ImageService::upload($imageFile, 'events');
         }
 
         $eventModel = new Event();
@@ -279,14 +297,13 @@ class EventController extends Controller
         // イベントの作成
         $eventId =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
 
-         // イベントカテゴリーの作成
+        // イベントカテゴリーの作成
         $eventCategoryModel->createEventCategory($eventId, $request['category']);
 
         // 登録成功のセッション
         session()->flash('status', 'イベントを登録しました');
 
         return to_route('events.index');
-
     }
 
     /**
@@ -332,7 +349,7 @@ class EventController extends Controller
     {
         // イベント情報取得
         $event = Event::findOrFail($event->id);
-        
+
         // アクセサでフォーマットされた日付を取得
         $eventDate = $event->eventDate;
         $startTime = $event->startTime;

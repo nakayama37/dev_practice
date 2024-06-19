@@ -117,10 +117,10 @@
               event.preventDefault();
               
               // リクエスト中は他のリクエストができないようにする
-                  if (isRequestInProgress) return;
-                  isRequestInProgress = true;
+                if (isRequestInProgress) return;
+                isRequestInProgress = true;
 
-                  likeToggle.classList.add('text-gray-200');  // クリックを無効化するためのクラスを追加
+                likeToggle.classList.add('text-gray-200');  // クリックを無効化するためのクラスを追加
 
                 const eventId = likeButton.getAttribute('data-event-id');
 
@@ -132,10 +132,10 @@
                     }
                 })
                 .then(response => response.json())
-                .then(data => {
-                
+                .then(data => {      
                     likeButton.setAttribute('data-liked', data.liked);
                     likeCount.innerText = data.likeCount;
+
                     if (data.liked) {
                         likeIcon.innerText = '❤️';
                         likeText.innerText = 'いいねを取り消す';

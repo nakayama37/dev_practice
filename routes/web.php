@@ -17,6 +17,8 @@ use App\Http\Controllers\LikeController;
 |
 */
 Route::get('/', [EventController::class, 'welcome'])->name('welcome');
+Route::get('/search/index', [EventController::class, 'searchIndex'])->name('search.index');
+Route::get('/events/search', [EventController::class, 'search'])->name('events.search');
 /*
 |--------------------------------------------------------------------------
 | admin Routes

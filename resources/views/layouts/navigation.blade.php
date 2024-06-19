@@ -15,6 +15,9 @@
                     <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
                         ホーム
                     </x-nav-link>
+                    <x-nav-link :href="route('search.index')" :active="request()->routeIs('search.index')">
+                        イベントを探す
+                    </x-nav-link>
                     <x-nav-link :href="route('mypage.index')" :active="request()->routeIs('mypage.index')">
                         マイページ
                     </x-nav-link>

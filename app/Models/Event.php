@@ -172,8 +172,36 @@ class Event extends Model
 
         return $reservedPeople;
     }
-   
 
+    /**
+     * イベント検索取得
+     * @param  $categoryId
+     * @return $events
+     */
+    public function search($categoryId)
+    {
+        $query = Event::query();
+
+        // 公開中かつ本日以降のイベントを取得
+        $query->where('is_public', true);
+        // To do 本日以降の日付のイベントを作った後にコメントイン
+            // ->where('start_at', '>=', Carbon::today());
+
+        if ($categoryId) {
+            $query->whereHas('categories', function ($q) use ($categoryId) {
+                $q->where('category_id', $categoryId);
+            });
+        }
+
+        $events = $query->with('categories')->get();
+
+        $events->transform(function ($event) {
+            $event->route = route('reservations.detail', ['event' => $event->id]);
+            return $event;
+        });
+
+        return $events;
+    }
     /**
      * イベント作成
      * @param  $request, $userId, $startDate, $endDate, $fileNameToStore
