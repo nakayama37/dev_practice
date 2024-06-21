@@ -54,6 +54,22 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Event::class, 'participants')->withPivot('id', 'number_of_people', 'is_checked_in', 'checked_in_at', 'canceled_at');
     }
+    /**
+     * Relation App\Models\Event
+     * @return belongsToMany
+     */
+    public function likedEvents()
+    {
+        return $this->belongsToMany(Event::class, 'likes');
+    }
+    /**
+     * Relation App\Models\Comment
+     * @return hasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
     /**
      * managerに更新

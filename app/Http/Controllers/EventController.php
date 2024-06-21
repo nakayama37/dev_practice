@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateEventRequest;
@@ -13,10 +15,33 @@ use App\Models\EventCategory;
 use App\Models\Participant;
 use App\Services\EventService;
 use App\Services\ImageService;
-use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
+    /*
+|--------------------------------------------------------------------------
+| ゲスト権限のコントローラー
+|--------------------------------------------------------------------------
+| welcome
+| searchIndex
+| search
+|
+*/
+    /**
+     * Display a listing of the resource.
+     */
+    public function welcome(Request $request)
+    {
+        $categoryModel = new Category();
+        $eventModel = new Event();
+
+        $categories = $categoryModel->getEvents();
+
+        $events = $eventModel->getEventRankings();
+
+       
+        return view('welcome', compact('categories', 'events'));
+    }
 
     /**
      * イベント検索画面
@@ -26,7 +51,7 @@ class EventController extends Controller
     public function searchIndex()
     {
         $categories = Category::all();
-        $events = Event::with('categories')->where('is_public', true)->paginate(20);
+        $events = Event::with('categories')->where('is_public', true)->paginate(21);
         return view('search.index', compact('categories', 'events'));
     }
     /**
@@ -36,8 +61,7 @@ class EventController extends Controller
      */
     public function search(Request $request)
     {
-        // dd($request);
-        // $categoryId = $request->input('category');
+
         $eventModel = new Event();
         $events = $eventModel->search($request);
        
@@ -50,6 +74,7 @@ class EventController extends Controller
 | 利用者のみ権限のコントローラー
 |--------------------------------------------------------------------------
 | createByOnlyUser
+| storeByOnlyUser
 |
 */
 
@@ -110,38 +135,25 @@ class EventController extends Controller
 |--------------------------------------------------------------------------
 | 利用者以上権限のコントローラー
 |--------------------------------------------------------------------------
-| welcome
 | home
 | detail
 | join
 |
 */
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function welcome(Request $request)
-    {
-        $categoryModel = new Category();
-        // 全てのイベント取得
-        $categories = $categoryModel->getEvents();
-
-        if ($request->ajax()) {
-            return view('welcome', compact('categories'))->render();
-        } else {
-            return view('welcome', compact('categories'));
-        }
-    }
     /**
      * Display a listing of the resource.
      */
     public function home()
     {
         $categoryModel = new Category();
-        // 全てのイベント取得
+        $eventModel = new Event();
+        
         $categories = $categoryModel->getEvents();
 
-        return view('home', compact('categories'));
+        $events = $eventModel->getEventRankings();
+
+
+        return view('home', compact('categories', 'events'));
     }
 
     /**
@@ -156,6 +168,7 @@ class EventController extends Controller
         $event = Event::findOrFail($event->id);
 
         $eventModel = new Event();
+        $participantModel = new Participant();
         // イベント参加人数を集計・算出
         $reservedPeople = $eventModel->getReservedPeople($event->id);
         // 予約が入っている場合、定員 ー 参加人数
@@ -166,11 +179,8 @@ class EventController extends Controller
             $reservablePeople = $event->max_people;
         }
 
-        $isReserved = Participant::where('user_id', '=', Auth::id())
-            ->where('event_id', '=', $event->id)
-            ->where('canceled_at', '=', null)
-            ->latest()
-            ->first();
+        // イベント参加者数を集計
+        $isReserved = $participantModel->getIsReserved($event->id);
 
         // イベントに対する全てのいいね数を取得
         $likeCount = $event->likes()->count();
@@ -183,7 +193,6 @@ class EventController extends Controller
         $endTime = $event->endTime;
 
         // イベント参加者数を集計
-        $participantModel = new Participant();
         $participantCount = $participantModel->participantCount($event->id);
 
         return view('reservations.show', compact('event', 'eventDate', 'startTime', 'endTime', 'participantCount', 'reservablePeople', 'isReserved', 'likeCount', 'liked'));

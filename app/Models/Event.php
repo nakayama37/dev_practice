@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Category;
@@ -67,6 +68,23 @@ class Event extends Model
     {
         return $this->hasMany(Like::class);
     }
+    /**
+     * Relation App\Models\User
+     * @return belongsToMany
+     */
+    public function userLikes()
+    {
+        return $this->belongsToMany(User::class, 'likes');
+    }
+
+    /**
+     * Relation App\Models\Comment
+     * @return hasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
     /**
      * イベント日付のフォーマット
@@ -105,6 +123,17 @@ class Event extends Model
     }
 
     /**
+     * ログインユーザーがこのイベントに参加しているかを判断する仮想属性を定義
+     * @param  void
+     * @return $is_user_participating
+     */
+    public function getIsUserParticipatingAttribute()
+    {
+        $userId = Auth::id();
+        return $this->users()->where('user_id', $userId)->exists();
+    }
+
+    /**
      * イベント一覧取得
      * @param  void
      * @return $events
@@ -125,6 +154,29 @@ class Event extends Model
         ->whereDate('start_at', '>=',  $today)
         ->orderBy('start_at', 'asc')
         ->paginate(10);
+
+        return $events;
+    }
+    /**
+     * イベントランキング取得
+     * @param  void
+     * @return $events
+     */
+    public function getEventRankings()
+    {
+        $now = Carbon::now();
+        $startOfMonth = $now->startOfMonth()->toDateString();
+        $endOfMonth = $now->endOfMonth()->toDateString();
+
+        $events = self::with('users')
+            ->whereBetween('start_at', [$startOfMonth, $endOfMonth]) // 開始日が今月のイベント
+            ->get()
+            ->map(function ($event) {
+                $event->total_participants = $event->users->sum('pivot.number_of_people');
+                return $event;
+            })
+            ->sortByDesc('total_participants')
+            ->take(10); // トップ10のイベントを取得
 
         return $events;
     }
@@ -175,7 +227,7 @@ class Event extends Model
 
     /**
      * イベント検索取得
-     * @param  $categoryId
+     * @param  $request
      * @return $events
      */
     public function search($request)
@@ -204,7 +256,7 @@ class Event extends Model
         $query->where('is_public', true);
 
         // 今日以降のイベントのみ取得
-        // $query->where('event_date', '>=', now());
+        // $query->where('start_at', '>=', now());
 
         $events = $query->with('categories')->get();
         $events->transform(function ($event) {
@@ -215,35 +267,7 @@ class Event extends Model
 
         return $events;
     }
-    // /**
-    //  * イベント検索取得
-    //  * @param  $categoryId
-    //  * @return $events
-    //  */
-    // public function search($categoryId)
-    // {
-    //     $query = Event::query();
-
-    //     // 公開中かつ本日以降のイベントを取得
-    //     $query->where('is_public', true);
-    //     // To do 本日以降の日付のイベントを作った後にコメントイン
-    //         // ->where('start_at', '>=', Carbon::today());
-
-    //     if ($categoryId) {
-    //         $query->whereHas('categories', function ($q) use ($categoryId) {
-    //             $q->where('category_id', $categoryId);
-    //         });
-    //     }
-
-    //     $events = $query->with('categories')->get();
-
-    //     $events->transform(function ($event) {
-    //         $event->route = route('reservations.detail', ['event' => $event->id]);
-    //         return $event;
-    //     });
-
-    //     return $events;
-    // }
+   
     /**
      * イベント作成
      * @param  $request, $userId, $startDate, $endDate, $fileNameToStore

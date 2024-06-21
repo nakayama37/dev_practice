@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyPageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +66,9 @@ Route::prefix('manager')
     Route::post('/mypage/{id}', [MyPageController::class, 'cancel'])->name('mypage.cancel');
     Route::post('/reservations', [EventController::class, 'join'])->name('reservations.join');
     Route::post('/events/{event}/like', [LikeController::class, 'toggleLike'])->name('events.like');
+    Route::get('/events/{event}/comments', [CommentController::class, 'index'])->name('comments.index');
+    Route::post('/events/{event}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 /*
 |--------------------------------------------------------------------------

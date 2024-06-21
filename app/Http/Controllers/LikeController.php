@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
+    /**
+     * toggle like
+     * 
+     * @return view
+     */
     public function toggleLike(Event $event)
     {
         $like = $event->likes()->where('user_id', Auth::id())->first();

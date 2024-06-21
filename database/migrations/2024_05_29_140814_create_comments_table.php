@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedInteger('event_id');
             $table->unsignedInteger('user_id');
-            $table->text('comment');
+            $table->text('content');
             $table->timestamps();
         });
     }

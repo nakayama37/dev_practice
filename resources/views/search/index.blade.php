@@ -2,21 +2,47 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
   <x-base-head />
     <body class="font-sans antialiased">
-        <x-base-header />
+       @auth
+         @include('layouts.navigation')
+       @else
+         <x-base-header />
+       @endauth
+
         <section class="text-gray-600 body-font min-h-screen bg-orange-50">
           <div class="container px-5 py-24 mx-auto">
             <h2 id="category-title" class="font-semibold text-xl text-gray-800 leading-tight">
                 全てのカテゴリーの検索結果
             </h2>
-            <div id="category-search-container" class="p-4">
-              <select id="category-select" class="pr-8 border border-gray-300 p-4 rounded">
-                  <option value="">全てのカテゴリー</option>
-                  @foreach($categories as $category)
+            <form id="search-form">
+              <div class="flex justify-start items-center mx-2">
+                <div  class="p-4">
+                  <label for="category_id">カテゴリー:</label>
+                  <select id="category-select" class="pr-8 border border-gray-300 p-4 rounded" name="category_id">
+                      <option value="">お選びください</option>
+                      @foreach($categories as $category)
                       <option value="{{ $category->id }}">{{ $category->name }}</option>
-                  @endforeach
-              </select>
-            </div>
-            <div id="event-list" class="flex flex-wrap -m-4">
+                      @endforeach
+                  </select>
+                </div>
+                <div class="mx-2">
+                    <label for="event_date">イベント日付:</label>
+                    <x-text-input type="date" id="event_date" name="event_date"/>
+                </div>
+                 <div class="mx-2">
+                    <label for="keyword">キーワード:</label>
+                    <x-text-input type="text" id="keyword" name="keyword"/>
+                </div>
+                <div>
+                   <button type="submit" class="p-2.5 ms-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                      </svg>
+                      <span class="sr-only">Search</span>
+                  </button>
+                </div>
+              </form>
+              </div>
+            <div id="event-list" class="flex flex-wrap mt-4">
               @foreach($events as $event)
               <div id="event-item" class="cursor-pointer p-4 md:w-1/3" onclick="location.href='{{ route('reservations.detail', [ 'event' => $event->id ]) }}'">
                 <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
@@ -50,6 +76,6 @@
             </div>
           </div>
         </section>
-         <x-search-category-js />
+         <x-search-js />
     </body>
 </html>

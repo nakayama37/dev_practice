@@ -40,12 +40,28 @@ class Participant extends Model
      */
     public function getEventParticipant($id)
     {
-        $reservation = Participant::where('user_id', '=', Auth::id())
+        $reservation = self::where('user_id', '=', Auth::id())
         ->where('event_id', '=', $id)
         ->latest()
         ->first();
 
         return $reservation;
+
+    }
+    /**
+     * 予約済みイベントを取得
+     * @param  $eventId イベントID
+     * @return $isReserved
+     */
+    public function getIsReserved($eventId)
+    {
+        $isReserved = self::where('user_id', '=', Auth::id())
+            ->where('event_id', '=', $eventId)
+            ->where('canceled_at', '=', null)
+            ->latest()
+            ->first();
+
+            return $isReserved;
 
     }
     /**

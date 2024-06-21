@@ -39,7 +39,11 @@
                           </div>
                           <div class="my-4">
                             <x-input-label for="max_people" value="参加者数" />
+                            @if($reservation)
                             {{ $reservation->number_of_people }}
+                            @else
+                            0
+                            @endif
                           </div>
                          
                           <div>
@@ -70,4 +74,5 @@
           }
         }
       </script>
+      
 </x-app-layout>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Like;
 use App\Models\Event;
 use App\Models\Participant;
 use App\Services\MyPageService;
@@ -26,7 +27,10 @@ class MyPageController extends Controller
         // 過去のマイイベント取得
         $pastEvents = MyPageService::reservedEvent($events, 'past');
 
-        return view('mypage.index', compact('fromTodayEvents', 'pastEvents'));
+        $likeModel = new Like();
+        $likedEvents = $likeModel->getLikedEvents($user);
+
+        return view('mypage.index', compact('fromTodayEvents', 'pastEvents', 'likedEvents'));
     }
     /**
      * イベント詳細
