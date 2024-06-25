@@ -24,6 +24,12 @@
                             <x-input-label for="content" value="イベント名" />
                             <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">{{ $event->title }}</h1>
                           </div>
+                          <div>
+                            <x-input-label for="event_date" value="カテゴリー" />
+                            @foreach($event->categories as $category)
+                            {{ $category->name }}
+                            @endforeach
+                          </div>
                           <div class="md:flex justify-start mt-4">
                             <div>
                               <x-input-label for="event_date" value="イベント日付" />
@@ -38,17 +44,37 @@
                               {{ $event->endTime }}
                             </div>
                           </div>
-                          <div class="my-4">
-                            <x-input-label for="max_people" value="定員数" />
-                            {{ $event->max_people }}
+                           <div class="md:flex justify-start mt-4">
+                            <div>
+                              <x-input-label for="venue" value="イベント場所" />
+                              {{ $event->location->venue }}
+                            </div>
+                            <div class="mx-2">
+                              <x-input-label for="full_address" value="住所" />
+                              〒{{ $event->location->full_address }}
+                            </div>
+                          </div>
+                          <div class="md:flex justify-start mt-4">
+                            <div class="my-4 mx-4">
+                              <x-input-label for="max_people" value="定員数" />
+                              {{ $event->max_people }}
+                            </div>
+                            <div class="my-4">
+                              <x-input-label for="price" value="価格" />
+                              ¥{{ $event->formatted_price }}
+                            </div>
+                          </div>
+                          <div>
+
                           </div>
                           <div class="my-4">
                             @if($event->is_public)
-                            <span class="text-green-500">表示中</span>
+                            <span class="text-green-500">イベント表示中</span>
                             @else
-                            <span class="text-red-500">非表示</span>
+                            <span class="text-red-500">イベント非表示</span>
                             @endif
                           </div>
+
                           <div>
                             <x-input-label for="content" value="イベント詳細" />
                             <p class="mb-8 leading-relaxed"> {!! nl2br(e($event->content))  !!}</p>

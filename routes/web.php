@@ -8,6 +8,7 @@ use App\Http\Controllers\MyPageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Api\AddressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -93,6 +94,15 @@ Route::prefix('manager')
 |
 */
 Route::middleware('auth')->get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
+/*
+|--------------------------------------------------------------------------
+| Routes
+|--------------------------------------------------------------------------
+|
+| Api
+|
+*/
+Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
 
 /*
 |--------------------------------------------------------------------------

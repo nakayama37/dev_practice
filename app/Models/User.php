@@ -45,7 +45,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
+/*
+|--------------------------------------------------------------------------
+| relations
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * Relation App\Models\Event
      * @return belongsToMany
@@ -70,7 +76,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
-
+/*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * managerに更新
      * @param  $user

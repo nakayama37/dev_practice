@@ -32,7 +32,13 @@ class Participant extends Model
         'checked_in_at',      // チェックイン時間
         'canceled_at',        // キャンセル日
     ];
-
+/*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * イベント参加者を取得
      * @param  $id イベントID
@@ -121,7 +127,7 @@ class Participant extends Model
     /**
      * イベントキャンセル
      * @param  $reservation
-     * @return void
+     * @return true
      */
     public function cancel($reservation)
     {

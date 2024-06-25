@@ -8,7 +8,7 @@ use App\Models\Category;
 use Illuminate\Database\Seeder;
 use App\Models\Event;
 use App\Models\EventCategory;
-use App\Models\Participant;
+use App\Models\Location;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         
         Event::factory(100)->create();
         EventCategory::factory(100)->create();
+        Location::factory(100)->create();
         $this->call([
             UserSeeder::class,
             ParticipantSeeder::class,

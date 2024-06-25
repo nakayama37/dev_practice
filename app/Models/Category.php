@@ -28,7 +28,13 @@ class Category extends Model
         'name',            // カテゴリー名
         'is_public',            // 公開・非公開
     ];
-
+/*
+|--------------------------------------------------------------------------
+| relations
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * Relation App\Models\Event
      * @return belongsToMany
@@ -37,6 +43,14 @@ class Category extends Model
     {
         return $this->belongsToMany(Event::class, 'event_categories');
     }
+
+ /*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+|
+*/
 
     /**
      * カテゴリー一覧取得
@@ -65,69 +79,33 @@ class Category extends Model
         ->whereNull('canceled_at')
         ->groupBy('event_id');
 
+        $likes = DB::table('likes')
+        ->select('event_id', DB::raw('count(*) as like_count'))
+        ->groupBy('event_id');
 
-        $categories = self::with(['events' => function ($query) use ($today, $participants) {
+        $comments = DB::table('comments')
+        ->select('event_id', DB::raw('count(*) as comment_count'))
+        ->groupBy('event_id');
+
+        $categories = self::with(['events' => function ($query) use ($today, $participants, $likes, $comments) {
             $query->leftJoinSub($participants, 'participants', function ($join) {
                 $join->on('events.id', '=', 'participants.event_id');
             })
-            // 本日以降の日付データを入れてからコメントイン
-                ->where('events.is_public',  true);
-                // ->whereDate('events.start_at', '>=',  $today)
-                // ->orderBy('events.start_at', 'asc');
-        }])
-            ->paginate(10);
+                ->leftJoinSub($likes, 'likes', function ($join) {
+                    $join->on('events.id', '=', 'likes.event_id');
+                })
+                ->leftJoinSub($comments, 'comments', function ($join) {
+                    $join->on('events.id', '=', 'comments.event_id');
+                })
+                ->where('events.is_public', true)
+                ->whereDate('events.start_at', '>=', $today)
+                ->orderBy('events.start_at', 'asc')
+                ->select('events.*', 'participants.number_of_people', 'likes.like_count', 'comments.comment_count'); // 必要なフィールドを選択
+        }, 'events.location'])
+        ->paginate(10);
+
 
         return $categories;
-    }
-
-    /**
-     * カテゴリー作成
-     * @param  $request
-     * @return void
-     */
-    public function createCategory($request)
-    {
-
-        DB::beginTransaction();
-        try {
-
-             self::create([
-                'name' => $request['name'],
-            ]);
-
-            DB::commit();
-        } catch (Throwable $e) {
-            DB::rollBack();
-
-            \Log::error("カテゴリー登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
-            \Log::error($e);
-        }
-
-        return;
-    }
-
-    /**
-     * カテゴリー編集
-     * @param  $request, $category
-     * @return void
-     */
-    public function updateCategory($request, $category)
-    {
-
-        DB::beginTransaction();
-        try {
-            $category->name = $request['name'];
-            $category->save();
-
-            DB::commit();
-        } catch (Throwable $e) {
-            DB::rollBack();
-
-            \Log::error("カテゴリー編集時にエラーが発生しました。エラー内容は下記です。編集内容:", $request);
-            \Log::error($e);
-        }
-
-        return;
     }
 
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
-class EventCategoryFactory extends Factory
+class LocationFactory extends Factory
 {
 
   /**
@@ -20,8 +20,11 @@ class EventCategoryFactory extends Factory
     static $eventId = 1;
       return [
         'event_id' => $eventId++,
-        'category_id' => $this->faker->numberBetween(1, 5)
-      ];
+        'postcode' => $this->faker->numerify('#######'),
+        'venue' => $this->faker->word,
+        'prefecture' => $this->faker->city,
+        'city' => $this->faker->streetName,
+        'street' => $this->faker->streetAddress ];
   }
 
 

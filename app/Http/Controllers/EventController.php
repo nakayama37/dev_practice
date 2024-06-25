@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\Location;
 use App\Models\Category;
 use App\Models\EventCategory;
 use App\Models\Participant;
 use App\Services\EventService;
 use App\Services\ImageService;
+
+
 
 class EventController extends Controller
 {
@@ -30,7 +32,7 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function welcome(Request $request)
+    public function welcome()
     {
         $categoryModel = new Category();
         $eventModel = new Event();
@@ -51,7 +53,9 @@ class EventController extends Controller
     public function searchIndex()
     {
         $categories = Category::all();
-        $events = Event::with('categories')->where('is_public', true)->paginate(21);
+        $eventModel = new Event();
+        $events = $eventModel->getSearchEvents();
+       
         return view('search.index', compact('categories', 'events'));
     }
     /**
@@ -100,12 +104,12 @@ class EventController extends Controller
     {
         // 現在認証しているユーザーのIDを取得
         $user_id = Auth::id();
-        $imageFile = $request['image'];
+        $imageFile = $request->file('image');
         $fileNameToStore = null;
 
         $userModel = new User();
         $eventModel = new Event();
-        $eventCategoryModel = new EventCategory();
+        $locationModel = new Location();
 
         // 主催者登録
         $user = User::findOrFail($user_id);
@@ -121,10 +125,13 @@ class EventController extends Controller
         }
 
         // イベントの作成
-        $eventId =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
+        $event =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
 
         // イベントカテゴリーの作成
-        $eventCategoryModel->createEventCategory($eventId, $request['category']);
+        $event->categories()->sync($request['categories']);
+
+        // イベント場所作成
+        $locationModel->createEventLocation($event->id, $request);
 
         // 登録成功のセッション
         session()->flash('status', 'イベントを登録しました');
@@ -141,7 +148,7 @@ class EventController extends Controller
 |
 */
     /**
-     * Display a listing of the resource.
+     * ログイン後ホーム画面
      */
     public function home()
     {
@@ -185,7 +192,6 @@ class EventController extends Controller
         // イベントに対する全てのいいね数を取得
         $likeCount = $event->likes()->count();
         $liked = $event->likes()->where('user_id', Auth::id())->exists();
-        // dd($likeCount);
 
         // アクセサでフォーマットされた日付を取得
         $eventDate = $event->eventDate;
@@ -209,7 +215,8 @@ class EventController extends Controller
         // 変数宣言
         $reservablePeople = 0;
         // 現在認証しているユーザーのIDを取得
-        $user_id = Auth::id();
+        $user = Auth::user();
+
         // イベント情報取得
         $event = Event::findOrFail($request['event_id']);
         $eventModel = new Event();
@@ -222,7 +229,8 @@ class EventController extends Controller
             // イベントが参加可能且つ、リクエスト参加人数が参加可能人数以下の場合、登録
             if ($reservablePeople > 0 && $reservablePeople >= $request['number_of_people']) {
                 // イベント参加登録
-                EventService::join($user_id, $request);
+                EventService::join($user, $request, $event);
+                
             } else {
                 // 定員オーバーの場合、登録しない
                 session()->flash('status', '登録できませんでした。定員オーバーです');
@@ -232,7 +240,8 @@ class EventController extends Controller
         } else {
             // イベント参加者がいない場合
             // イベント参加登録
-            EventService::join($user_id, $request);
+            EventService::join($user, $request, $event);
+            
         }
 
         return to_route('home');
@@ -259,10 +268,10 @@ class EventController extends Controller
      */
     public function index()
     {
-
+        $user_id = Auth::id();
         $eventModel = new Event();
         // 全てのイベント取得
-        $events = $eventModel->getEvents();
+        $events = $eventModel->getEvents($user_id);
 
         return view('manager.events.index', compact('events'));
     }
@@ -286,11 +295,13 @@ class EventController extends Controller
      */
     public function store(StoreEventRequest $request)
     {
-
-        // 現在認証しているユーザーのIDを取得
+    
         $user_id = Auth::id();
-        $imageFile = $request['image'];
+        $imageFile = $request->file('image');
         $fileNameToStore = null;
+
+        $eventModel = new Event();
+        $locationModel = new Location();
 
         // 日付と時間を結合
         $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
@@ -301,14 +312,14 @@ class EventController extends Controller
             $fileNameToStore = ImageService::upload($imageFile, 'events');
         }
 
-        $eventModel = new Event();
-        $eventCategoryModel = new EventCategory();
-
         // イベントの作成
-        $eventId =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
+        $event =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
 
         // イベントカテゴリーの作成
-        $eventCategoryModel->createEventCategory($eventId, $request['category']);
+        $event->categories()->sync($request['categories']);
+
+        // イベント場所作成
+        $locationModel->createEventLocation($event->id, $request);
 
         // 登録成功のセッション
         session()->flash('status', 'イベントを登録しました');
@@ -325,7 +336,7 @@ class EventController extends Controller
     public function show(Event $event)
     {
         // イベント情報取得
-        $event = Event::findOrFail($event->id);
+        $event = Event::with(['location', 'categories'])->findOrFail($event->id);
 
         $users = $event->users;
 
@@ -358,14 +369,15 @@ class EventController extends Controller
     public function edit(Event $event)
     {
         // イベント情報取得
-        $event = Event::findOrFail($event->id);
+        $event = Event::with(['location', 'categories'])->findOrFail($event->id);
+        $categories = Category::all();
 
         // アクセサでフォーマットされた日付を取得
         $eventDate = $event->eventDate;
         $startTime = $event->startTime;
         $endTime = $event->endTime;
 
-        return view('manager.events.edit', compact('event', 'eventDate', 'startTime', 'endTime'));
+        return view('manager.events.edit', compact('event', 'eventDate', 'startTime', 'endTime', 'categories'));
     }
 
     /**
@@ -379,15 +391,24 @@ class EventController extends Controller
         // 現在認証しているユーザーのIDを取得
         $user_id = Auth::id();
 
+        $imageFile = $request->file('image');
+        $fileNameToStore = null;
         // 日付と時間を結合
         $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
 
-        // イベントの作成
+        // 画像の編集
+        if (!is_null($imageFile) && $imageFile->isValid()) {
+    
+            $fileNameToStore = ImageService::update($imageFile, 'events', $event->image);
+        }
+        
+        // イベントの編集
         $eventModel = new Event();
-        // イベント情報取得
-        $event = Event::findOrFail($event->id);
-        $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate);
+        $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate, $fileNameToStore);
+
+        // カテゴリ編集
+        $event->categories()->sync($request['categories']);
 
         // 登録成功のセッション
         session()->flash('status', 'イベントを更新しました');
@@ -402,10 +423,12 @@ class EventController extends Controller
      */
     public function past()
     {
+        // 現在認証しているユーザーのIDを取得
+        $user_id = Auth::id();
 
         $eventModel = new Event();
         // 過去のイベント取得
-        $events = $eventModel->getPastEvents();
+        $events = $eventModel->getPastEvents($user_id);
 
         return view('manager.events.past', compact('events'));
     }

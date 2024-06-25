@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Like;
+use App\Models\Location;
 
 
 class Event extends Model
@@ -38,9 +39,17 @@ class Event extends Model
         'max_people',         // 定員
         'price',              // イベント価格
         'image',              // イベント画像パス
-        'is_public',               // 公開・非公開
-        'is_paid',               // 有料・無料
+        'is_public',          // 公開・非公開
+        'is_paid',            // 有料・無料
     ];
+
+/*
+|--------------------------------------------------------------------------
+| relations
+|--------------------------------------------------------------------------
+|
+|
+*/
 
     /**
      * Relation App\Models\User
@@ -85,7 +94,22 @@ class Event extends Model
     {
         return $this->hasMany(Comment::class);
     }
+    /**
+     * Relation App\Models\Location
+     * @return hasOne
+     */
+    public function location()
+    {
+        return $this->hasOne(Location::class);
+    }
 
+        /*
+|--------------------------------------------------------------------------
+| formatter
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * イベント日付のフォーマット
      * @param  void
@@ -121,7 +145,13 @@ class Event extends Model
             get: fn () => Carbon::parse($this->end_at)->format('H時i分')
         );
     }
-
+ /*
+|--------------------------------------------------------------------------
+| getter
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * ログインユーザーがこのイベントに参加しているかを判断する仮想属性を定義
      * @param  void
@@ -132,13 +162,63 @@ class Event extends Model
         $userId = Auth::id();
         return $this->users()->where('user_id', $userId)->exists();
     }
+    /**
+     * フォーマットされた価格を取得
+     * @param  void
+     * @return $is_user_participating
+     */
+    public function getPriceAttribute($value)
+    {
+        // 例: 1234.56 を 1234 に変換する
+        return (int) $value;
+    }
+    /**
+     * フォーマットされた価格を取得
+     * @param  void
+     * @return $is_user_participating
+     */
+    public function getFormattedPriceAttribute()
+    {
+        // 価格を数値として取得
+        $price = $this->attributes['price'];
 
+        // フォーマットに使用するロケールと通貨を設定
+        $formattedPrice = number_format($price);
+
+        // 価格を通貨形式にフォーマットして返す
+        return $formattedPrice;
+    }
+    /*
+|--------------------------------------------------------------------------
+| setter
+|--------------------------------------------------------------------------
+|
+|
+*/
+    /**
+     * 価格が入力されてなければ０で保存
+     * @param  $request
+     * @return 
+     */
+    public function setPriceAttribute($value)
+    {
+        $this->attributes['price'] = $value ?? 0;
+    }
+
+/*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+|
+*/
+    
     /**
      * イベント一覧取得
-     * @param  void
+     * @param  $user_id
      * @return $events
      */
-    public function getEvents()
+    public function getEvents($user_id)
     {
         $today = Carbon::today();
 
@@ -151,6 +231,7 @@ class Event extends Model
         leftJoinSub($participants, 'participants', function ($join) {
             $join->on('events.id', '=', 'participants.event_id');
         })
+        ->where('user_id', $user_id)
         ->whereDate('start_at', '>=',  $today)
         ->orderBy('start_at', 'asc')
         ->paginate(10);
@@ -165,27 +246,57 @@ class Event extends Model
     public function getEventRankings()
     {
         $now = Carbon::now();
+        $today = Carbon::today();
+
         $startOfMonth = $now->startOfMonth()->toDateString();
         $endOfMonth = $now->endOfMonth()->toDateString();
 
-        $events = self::with('users')
-            ->whereBetween('start_at', [$startOfMonth, $endOfMonth]) // 開始日が今月のイベント
+        $participants = DB::table('participants')
+        ->select('event_id', DB::raw('sum(number_of_people) as total_participants'))
+        ->whereNull('canceled_at')
+        ->groupBy('event_id');
+
+        $likes = DB::table('likes')
+        ->select('event_id', DB::raw('count(*) as like_count'))
+        ->groupBy('event_id');
+
+        $comments = DB::table('comments')
+        ->select('event_id', DB::raw('count(*) as comment_count'))
+        ->groupBy('event_id');
+
+        $events = self::with(['users', 'location'])
+        ->whereBetween('start_at', [$startOfMonth, $endOfMonth])
+            ->where('is_public', true)
+            ->whereDate('start_at', '>=', $today)
+            ->leftJoinSub($participants, 'participants', function ($join) {
+                $join->on('events.id', '=', 'participants.event_id');
+            })
+            ->leftJoinSub($likes, 'likes', function ($join) {
+                $join->on('events.id', '=', 'likes.event_id');
+            })
+            ->leftJoinSub($comments, 'comments', function ($join) {
+                $join->on('events.id', '=', 'comments.event_id');
+            })
+            ->select('events.*', 'participants.total_participants', 'likes.like_count', 'comments.comment_count')
             ->get()
             ->map(function ($event) {
-                $event->total_participants = $event->users->sum('pivot.number_of_people');
+                $event->total_participants = $event->total_participants ?? 0;
+                $event->like_count = $event->like_count ?? 0;
+                $event->comment_count = $event->comment_count ?? 0;
                 return $event;
             })
             ->sortByDesc('total_participants')
             ->take(10); // トップ10のイベントを取得
 
         return $events;
+
     }
     /**
      * 過去イベント一覧取得
-     * @param  void
+     * @param  $user_id
      * @return $events
      */
-    public function getPastEvents()
+    public function getPastEvents($user_id)
     {
         $today = Carbon::today();
 
@@ -198,6 +309,7 @@ class Event extends Model
         leftJoinSub($participants, 'participants', function ($join) {
             $join->on('events.id', '=', 'participants.event_id');
         })
+        ->where('user_id', $user_id)
         ->whereDate('start_at', '<',  $today)
         ->orderBy('start_at', 'desc')
         ->paginate(10);
@@ -224,6 +336,40 @@ class Event extends Model
 
         return $reservedPeople;
     }
+    /**
+     * 検索画面のイベント一覧取得
+     * @param  void
+     * @return $event
+     */
+    public function getSearchEvents()
+    {
+
+        // サブクエリを作成
+        $likes = DB::table('likes')
+        ->select('event_id', DB::raw('count(*) as like_count'))
+        ->groupBy('event_id');
+
+        $comments = DB::table('comments')
+        ->select('event_id', DB::raw('count(*) as comment_count'))
+        ->groupBy('event_id');
+
+        // イベントを取得
+        $events = Event::with(['categories', 'location'])
+        ->leftJoinSub($likes, 'likes', function ($join) {
+            $join->on('events.id', '=', 'likes.event_id');
+        })
+            ->leftJoinSub($comments, 'comments', function ($join) {
+                $join->on('events.id', '=', 'comments.event_id');
+            })
+            ->where('is_public', true)
+            ->where('start_at', '>=', now())
+            ->orderBy('start_at', 'asc')
+            ->select('events.*', 'likes.like_count', 'comments.comment_count') // 必要なフィールドを選択
+            ->paginate(21);
+
+
+        return $events;
+    }
 
     /**
      * イベント検索取得
@@ -236,8 +382,10 @@ class Event extends Model
 
         // キーワード検索
         if ($request->filled('keyword')) {
-            $query->where('title', 'like', '%' . $request->keyword . '%')
-                ->orWhere('content', 'like', '%' . $request->keyword . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->keyword . '%')
+                    ->orWhere('content', 'like', '%' . $request->keyword . '%');
+            });
         }
 
         // カテゴリ検索
@@ -256,9 +404,28 @@ class Event extends Model
         $query->where('is_public', true);
 
         // 今日以降のイベントのみ取得
-        // $query->where('start_at', '>=', now());
+        $query->where('start_at', '>=', now());
 
-        $events = $query->with('categories')->get();
+        // サブクエリを作成
+        $likes = DB::table('likes')
+        ->select('event_id', DB::raw('count(*) as like_count'))
+        ->groupBy('event_id');
+
+        $comments = DB::table('comments')
+        ->select('event_id', DB::raw('count(*) as comment_count'))
+        ->groupBy('event_id');
+
+        // イベントを取得
+        $events = $query->with('categories')
+        ->leftJoinSub($likes, 'likes', function ($join) {
+            $join->on('events.id', '=', 'likes.event_id');
+        })
+        ->leftJoinSub($comments, 'comments', function ($join) {
+            $join->on('events.id', '=', 'comments.event_id');
+        })
+        ->select('events.*', 'likes.like_count', 'comments.comment_count') 
+        ->get();
+
         $events->transform(function ($event) {
             $event->event_date = $event->eventDate;
             $event->route = route('reservations.detail', ['event' => $event->id]);
@@ -286,8 +453,10 @@ class Event extends Model
                             'start_at' => $startDate,
                             'end_at' => $endDate,
                             'max_people' => $request['max_people'],
+                            'price' => $request['price'],
                             'image' => $fileNameToStore,
                             'is_public' => $request['is_public'],
+                            'is_paid' => $request['price'] > 0 ? true : false,
                         ]); 
 
             DB::commit();
@@ -300,7 +469,7 @@ class Event extends Model
 
         }
 
-        return $event->id;
+        return $event;
 
     }
     /**
@@ -308,7 +477,7 @@ class Event extends Model
      * @param  $request, $event, $userId, $startDate, $endDate
      * @return void
      */
-    public function updateEvent($request, $event, $user_id, $startDate, $endDate)
+    public function updateEvent($request, $event, $user_id, $startDate, $endDate, $fileNameToStore)
     {
 
         DB::beginTransaction();
@@ -319,7 +488,10 @@ class Event extends Model
                 $event->start_at = $startDate;
                 $event->end_at = $endDate;
                 $event->max_people = $request['max_people'];
+                $event->price = $request['price'];
+                $event->image = $fileNameToStore;
                 $event->is_public = $request['is_public'];
+                $event->is_paid = $request['price'] > 0 ? true : false;
                 $event->save();
 
             DB::commit();

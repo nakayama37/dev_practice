@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Participant;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EventRegistrationConfirmation;
 
 class EventService
 
@@ -24,11 +26,11 @@ class EventService
    * @param  $user_id, $request
    * @return view
    */
-  public static function join($user_id, $request) 
+  public static function join($user, $request, $event) 
   {
       $participantModel = new Participant();
       // // イベント参加の作成
-      $joined = $participantModel->joinEvent($user_id, $request);
+      $joined = $participantModel->joinEvent($user->id, $request);
 
       if (!$joined) {
         // イベントには既に参加済みの場合
@@ -37,7 +39,10 @@ class EventService
         return to_route('home');
       }
 
+      // 確認メール送信
+      Mail::to($user->email)->send(new EventRegistrationConfirmation($event, $user));
+
       // 登録成功のセッション
-      session()->flash('status', 'イベントに参加登録しました');   
+      session()->flash('status', 'イベント参加登録が完了し、確認メールを送信しました');  
   }
 }

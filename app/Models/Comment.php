@@ -34,6 +34,13 @@ class Comment extends Model
     // アクセサをJSONに含める
     protected $appends = ['formatted_created_at'];
 
+/*
+|--------------------------------------------------------------------------
+| relations
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * Relation App\Models\Event
      * @return belongsTo
@@ -50,15 +57,25 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    // アクセサの定義
+ /*
+|--------------------------------------------------------------------------
+| getter
+|--------------------------------------------------------------------------
+|
+|
+*/
     public function getFormattedCreatedAtAttribute()
     {
         return $this->created_at->format('Y-m-d');
     }
 
-  
-
+ /*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * コメント作成
      * @param  $request, $eventId

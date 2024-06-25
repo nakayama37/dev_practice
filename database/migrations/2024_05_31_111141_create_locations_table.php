@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('event_id');
-            $table->string('name', 255);
-            $table->string('postal_code', 10);
+            $table->string('venue', 255);
+            $table->string('postcode', 10);
             $table->string('prefecture', 255);
             $table->string('city', 255);
             $table->string('street', 255);

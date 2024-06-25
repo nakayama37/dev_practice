@@ -17,13 +17,15 @@ class EventFactory extends Factory
    */
   public function definition(): array
   {
-    $dummyDate = $this->faker->dateTimeThisMonth;
+    $startAt = $this->faker->dateTimeBetween('now', '+1 month');
+    $endAt = (clone $startAt)->modify('+' . mt_rand(1, 7) . ' hours');
+    
       return [
         'user_id' => 2,
         'title' => $this->faker->word,
         'content' => $this->faker->realText,
-        'start_at' => $dummyDate->format('Y-m-d H:i:s'),
-        'end_at' => $dummyDate->modify('+1hour')->format('Y-m-d H:i:s'),
+        'start_at' => $startAt,
+        'end_at' => $endAt,
         'max_people' => $this->faker->numberBetween(1, 20),
         'is_public' => $this->faker->boolean,
         'is_paid' => $this->faker->boolean

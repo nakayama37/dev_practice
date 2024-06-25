@@ -125,6 +125,7 @@ return [
     'prohibited_unless' => ':otherが:valueでない場合、:attributeは入力禁止です。',
     'prohibits' => 'attributeは:otherの入力を禁じています。',
     'regex' => ':attributeに正しい形式を指定してください。',
+    'postcode.regex' => '郵便番号は123-4567または1234567の形式で入力してください。',
     'required' => ':attributeは必ず指定してください。',
     'required_array_keys' => ':attributeは、:valuesの項目を含めてください。',
     'required_if' => ':otherが:valueの場合、:attributeも指定してください。',
@@ -191,7 +192,7 @@ return [
         'available' => '利用可能',
         'birthday' => '誕生日',
         'body' => '本文',
-        'city' => '市',
+        'city' => '市町村区',
         'content' => 'コンテンツ',
         'country' => '国',
         'created_at' => '作成日',
@@ -242,7 +243,7 @@ return [
         'short_text' => '短いテキスト',
         'size' => 'サイズ',
         'state' => '状態',
-        'street' => '街',
+        'street' => '以降の住所',
         'student' => '学生',
         'subject' => '課題',
         'teacher' => '先生',
@@ -263,7 +264,8 @@ return [
         'start_at' => '開始時間',
         'end_at' => '終了時間',
         'max_people' => '定員',
-        'number_of_people' => '参加人数'
+        'number_of_people' => '参加人数',
+        'postcode' => '郵便番号',
     ],
 
 ];

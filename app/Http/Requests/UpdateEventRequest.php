@@ -23,13 +23,19 @@ class UpdateEventRequest extends FormRequest
   public function rules(): array
   {
     return [
+        'categories' => ['required', 'array'],
         'title' => ['required', 'max:50'], 
         'content' => ['required', 'max:200'], 
         'event_date' => ['required', 'date'], 
         'start_at' => ['required'], 
         'end_at' => ['required', 'after:start_at'], 
-        'max_people' => ['required', 'numeric', 'between:1,20'], 
-        'is_public' => ['required', 'boolean']
+        'max_people' => ['required', 'numeric', 'between:1,20'],
+        'price' => ['numeric'],
+        'is_public' => ['required', 'boolean'],
+        'postcode' => ['required', 'regex:/^\d{3}-?\d{4}$/'],
+        'prefecture' => ['required', 'string', 'max:255'],
+        'city' => ['required', 'string', 'max:255'],
+        'street' => ['required', 'string', 'max:255']
     ];
   }
 }

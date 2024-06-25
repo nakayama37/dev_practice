@@ -27,10 +27,16 @@ class EventCategory extends Model
         'event_id',            // イベントID
         'category_id'            // カテゴリーID
     ];
-
+/*
+|--------------------------------------------------------------------------
+| database
+|--------------------------------------------------------------------------
+|
+|
+*/
     /**
      * イベントカテゴリー作成
-     * @param  $eventID, $request['category']
+     * @param  $eventID, $eventCategoryId
      * @return void
      */
     public function createEventCategory($eventId, $eventCategoryId)
