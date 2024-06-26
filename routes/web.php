@@ -8,7 +8,9 @@ use App\Http\Controllers\MyPageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Auth\LineLoginController;
 use App\Http\Controllers\Api\AddressController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -103,6 +105,19 @@ Route::middleware('auth')->get('/reservations/{event}', [EventController::class,
 |
 */
 Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
+/*
+|--------------------------------------------------------------------------
+| Line login
+|--------------------------------------------------------------------------
+|
+| lineログイン連携
+|
+*/
+Route::middleware(['web'])->group(function () {
+    Route::get('line/login', [LineLoginController::class, 'redirectToProvider'])->name('line.login');
+    Route::get('line/callback', [LineLoginController::class, 'handleProviderCallback']);
+});
+
 
 /*
 |--------------------------------------------------------------------------

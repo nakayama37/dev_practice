@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Mail\RegistrationConfirmation;
+use Illuminate\Support\Facades\Mail;
 
 class RegisteredUserController extends Controller
 {
@@ -44,6 +46,10 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        // 確認メール送信
+        Mail::to($request->email)->send(new RegistrationConfirmation($user, $request->password, null));
+                
 
         Auth::login($user);
 

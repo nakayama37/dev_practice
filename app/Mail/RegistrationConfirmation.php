@@ -3,18 +3,15 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class EventRegistrationConfirmation extends Mailable
+class RegistrationConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $event;
     public $user;
+    public $password;
     public $addFriendUrl;
 
     /**
@@ -22,10 +19,11 @@ class EventRegistrationConfirmation extends Mailable
      *
      * @return void
      */
-    public function __construct($event, $user)
+    public function __construct($user,$password,$addFriendUrl)
     {
-        $this->event = $event;
         $this->user = $user;
+        $this->password = $password;
+        $this->addFriendUrl = $addFriendUrl;
     }
 
     /**
@@ -35,7 +33,7 @@ class EventRegistrationConfirmation extends Mailable
      */
     public function build()
     {
-        return $this->subject('イベント参加登録確認')
-        ->view('emails.event_registration_confirmation');
+        return $this->subject('ユーザー登録確認')
+        ->view('emails.registration_confirmation');
     }
 }

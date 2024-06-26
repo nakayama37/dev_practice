@@ -10,7 +10,9 @@
         "intervention/image": "^3.6",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "linecorp/line-bot-sdk": "^1.1.0",
+        "socialiteproviders/line": "^4.1"
     },
     "require-dev": {
         "askdkc/breezejp": "^1.8",
@@ -27,7 +29,8 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "LINE\\": "vendor/linecorp/line-bot-sdk/src"
         }
     },
     "autoload-dev": {

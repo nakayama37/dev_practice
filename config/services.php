@@ -30,10 +30,19 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-    
+
     'line' => [
-        'channel_token' => env('LINE_CHANNEL_TOKEN'),
-        'channel_secret' => env('LINE_CHANNEL_SECRET'),
+        // Messaging Apiチャンネル
+        'messaging_api_channel_id' => env('LINE_MESSAGING_API_CHANNEL_ID'),
+        'messaging_api_channel_token' => env('LINE_MESSAGING_API_ACCESS_TOKEN'),
+        'messaging_api_channel_secret' => env('LINE_MESSAGING_API_CHANNEL_SECRET'),
+        // Line Login チャンネル
+        'client_id' => env('LINE_LOGIN_CHANNEL_ID'),
+        'client_secret' => env('LINE_LOGIN_CHANNEL_SECRET'),
+
+        'redirect' => env('LINE_LOGIN_CALLBACK_URL'),
+
+        'add_friend_url' => env('LINE_ADD_FRIEND_URL'),
     ],
 
 ];
