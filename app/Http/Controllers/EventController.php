@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\Category;
-use App\Models\EventCategory;
 use App\Models\Participant;
 use App\Services\EventService;
 use App\Services\ImageService;
@@ -20,6 +19,22 @@ use App\Services\ImageService;
 
 class EventController extends Controller
 {
+
+    /**
+     * セッションメッセージ
+     *
+     * @var array<string,string>
+     */
+    private const MESSAGES = [
+        'SUCCESS' => [
+            'STORE_EVENT' => 'イベントを登録しました',
+            'UPDATE_EVENT' => 'イベントを更新しました'
+        ],
+        'ERROR' => [
+            'OVER_CAPACITY' => '定員オーバーです 登録できませんでした'
+        ]
+    ];
+
     /*
 |--------------------------------------------------------------------------
 | ゲスト権限のコントローラー
@@ -134,7 +149,7 @@ class EventController extends Controller
         $locationModel->createEventLocation($event->id, $request);
 
         // 登録成功のセッション
-        session()->flash('status', 'イベントを登録しました');
+        session()->flash('status', self::MESSAGES['SUCCESS']['STORE_EVENT']);
 
         return to_route('events.index');
     }
@@ -233,7 +248,7 @@ class EventController extends Controller
                 
             } else {
                 // 定員オーバーの場合、登録しない
-                session()->flash('status', '登録できませんでした。定員オーバーです');
+                session()->flash('status', self::MESSAGES['ERROR']['OVER_CAPACITY']);
 
                 return to_route('home');
             }
@@ -324,7 +339,7 @@ class EventController extends Controller
         
 
         // 登録成功のセッション
-        session()->flash('status', 'イベントを登録しました');
+        session()->flash('status', self::MESSAGES['SUCCESS']['STORE_EVENT']);
 
         return to_route('events.index');
     }
@@ -390,6 +405,10 @@ class EventController extends Controller
      */
     public function update(UpdateEventRequest $request, Event $event)
     {
+        
+        $eventModel = new Event();
+        $locationModel = new Location();
+
         // 現在認証しているユーザーのIDを取得
         $user_id = Auth::id();
 
@@ -406,14 +425,16 @@ class EventController extends Controller
         }
         
         // イベントの編集
-        $eventModel = new Event();
         $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate, $fileNameToStore);
-
+        
         // カテゴリ編集
         $event->categories()->sync($request['categories']);
+        
+        // 場所編集
+        $locationModel->updateEventLocation($event, $request);
 
         // 登録成功のセッション
-        session()->flash('status', 'イベントを更新しました');
+        session()->flash('status', self::MESSAGES['SUCCESS']['UPDATE_EVENT']);
 
         return to_route('events.index');
     }

@@ -55,7 +55,7 @@ class EventCategory extends Model
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $eventId, $eventCategoryId);
+            \Log::error("イベントカテゴリー登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $eventId, $eventCategoryId);
             \Log::error($e);
         }
 

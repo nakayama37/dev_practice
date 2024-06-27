@@ -100,7 +100,7 @@ class Category extends Model
                 ->where('events.is_public', true)
                 ->whereDate('events.start_at', '>=', $today)
                 ->orderBy('events.start_at', 'asc')
-                ->select('events.*', 'participants.number_of_people', 'likes.like_count', 'comments.comment_count'); // 必要なフィールドを選択
+                ->select('events.*', 'participants.number_of_people', 'likes.like_count', 'comments.comment_count'); 
         }, 'events.location'])
         ->paginate(10);
 
@@ -126,7 +126,7 @@ class Category extends Model
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $category);
+            \Log::error("公開・非公開変更時にエラーが発生しました。エラー内容は下記です。変更内容:", $category);
             \Log::error($e);
         }
 

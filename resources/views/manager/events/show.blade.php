@@ -55,11 +55,11 @@
                             </div>
                           </div>
                           <div class="md:flex justify-start mt-4">
-                            <div class="my-4 mx-4">
+                            <div class="my-4">
                               <x-input-label for="max_people" value="定員数" />
                               {{ $event->max_people }}
                             </div>
-                            <div class="my-4">
+                            <div class="my-4 mx-4">
                               <x-input-label for="price" value="価格" />
                               ¥{{ $event->formatted_price }}
                             </div>

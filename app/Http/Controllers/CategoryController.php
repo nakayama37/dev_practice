@@ -10,6 +10,23 @@ use App\Http\Requests\UpdateCategoryRequest;
 
 class CategoryController extends Controller
 {
+
+    /**
+     * セッションメッセージ
+     *
+     * @var array<string,string>
+     */
+    private const MESSAGES = [
+        'SUCCESS' => [
+            'STORE_CATEGORY' => 'イベントを登録しました',
+            'UPDATE_CATEGORY' => 'イベントを更新しました',
+            'TOGGLE_PUBLIC' => '公開・非公開を変更しました'
+        ],
+        'ERROR' => [
+            
+        ]
+    ];
+
     /**
      * カテゴリー一覧
      * 
@@ -51,7 +68,7 @@ class CategoryController extends Controller
         $categoryModel->createCategory($request);
 
         // 登録成功のセッション
-        session()->flash('status', 'カテゴリーを登録しました');
+        session()->flash('status', self::MESSAGES['SUCCESS']['STORE_CATEGORY']);
 
         return to_route('admin.categories.index');
     }
@@ -86,7 +103,7 @@ class CategoryController extends Controller
         $categoryModel->updateCategory($request, $category);
 
         // 登録成功のセッション
-        session()->flash('status', 'カテゴリーを更新しました');
+        session()->flash('status', self::MESSAGES['SUCCESS']['UPDATE_CATEGORY']);
 
         return to_route('categories.index');
     }
@@ -112,7 +129,7 @@ class CategoryController extends Controller
         }
         
         // 登録成功のセッション
-        session()->flash('status', '公開・非公開を変更しました');
+        session()->flash('status', self::MESSAGES['SUCCESS']['TOGGLE_PUBLIC']);
 
         return to_route('categories.index');
     }
