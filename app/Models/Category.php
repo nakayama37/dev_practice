@@ -126,7 +126,7 @@ class Category extends Model
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $category);
+            \Log::error("公開・非公開変更時にエラーが発生しました。エラー内容は下記です。変更内容:", $category);
             \Log::error($e);
         }
 

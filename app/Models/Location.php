@@ -89,7 +89,7 @@ class Location extends Model
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("コメント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error("イベント場所登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
             \Log::error($e);
         }
 
@@ -98,28 +98,27 @@ class Location extends Model
 
     /**
      * イベント場所情報編集
-     * @param  $request, $event, $userId, $startDate, $endDate
+     * @param  $request, $event
      * @return void
      */
-    public function updateEvent($request, $event, $user_id, $startDate, $endDate)
+    public function updateEventLocation($event, $request)
     {
 
         DB::beginTransaction();
         try {
-            $event->user_id = $user_id;
-            $event->title = $request['title'];
-            $event->content = $request['content'];
-            $event->start_at = $startDate;
-            $event->end_at = $endDate;
-            $event->max_people = $request['max_people'];
-            $event->is_public = $request['is_public'];
-            $event->save();
+            $event->location->update([
+                'postcode' => $request['postcode'],
+                'venue' => $request['venue'],
+                'prefecture' => $request['prefecture'],
+                'city' => $request['city'],
+                'street' => $request['street'],
+            ]);
 
             DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error("イベント場所更新時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
             \Log::error($e);
         }
 

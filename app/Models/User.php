@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
 use App\Models\Event;
+use Illuminate\Support\Facades\Password;
 
 class User extends Authenticatable
 {
@@ -45,6 +46,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+    ];
+
+    /**
+     * roles
+     *
+     * @var array{
+     *  MANAGER: string,
+     *  USER: string
+     * }
+     */
+    private const ROLE = [
+        'MANAGER' => '5',
+        'USER'  => '9',
     ];
 /*
 |--------------------------------------------------------------------------
@@ -94,7 +108,7 @@ class User extends Authenticatable
 
         DB::beginTransaction();
         try {
-            $user->role = 5;
+            $user->role = self::ROLE['MANAGER'];
             $user->save();
 
             DB::commit();
@@ -106,5 +120,49 @@ class User extends Authenticatable
         }
 
         return;
+    }
+
+    /**
+     * 既存ユーザーの取得
+     * 
+     * @param  $line_id
+     * @return $email
+     */
+    public function getExistingUserByLineLogin($line_id, $email)
+    {
+        $existingUser = User::where('email', $email)
+            ->orWhere('line_id', $line_id)
+            ->first();
+
+        return $existingUser;
+    }
+
+    /**
+     * Lineログインからユーザー登録
+     * @param  $user,$email,$line_id,$password
+     * @return void
+     */
+    public function storeByLineLogin($user, $email, $line_id, $password)
+    {
+
+        DB::beginTransaction();
+        try {
+            $newUser = User::create([
+                'name' => $user->name ?? $user->nickname,
+                'email' => $email,
+                'line_id' => $line_id,
+                'password' => $password,
+                'role' => self::ROLE['USER'],
+
+            ]);
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $user);
+            \Log::error($e);
+        }
+
+        return $newUser;
     }
 }

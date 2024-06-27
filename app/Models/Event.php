@@ -43,6 +43,20 @@ class Event extends Model
         'is_paid',            // 有料・無料
     ];
 
+    /**
+     * The error  messages.
+     *
+     * @var array<string,string>
+     */
+    private const ERRORS = [
+        'STORE' => [
+            'MESSAGE' => 'イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:'
+        ],
+        'UPDATE' => [
+            'MESSAGE' => 'イベント更新時にエラーが発生しました。エラー内容は下記です。更新内容:'
+        ]
+    ];
+
 /*
 |--------------------------------------------------------------------------
 | relations
@@ -364,7 +378,7 @@ class Event extends Model
             ->where('is_public', true)
             ->where('start_at', '>=', now())
             ->orderBy('start_at', 'asc')
-            ->select('events.*', 'likes.like_count', 'comments.comment_count') // 必要なフィールドを選択
+            ->select('events.*', 'likes.like_count', 'comments.comment_count') 
             ->paginate(21);
 
 
@@ -464,7 +478,7 @@ class Event extends Model
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error(self::ERRORS['MESSAGE']['STORE'], $request);
             \Log::error($e);
 
         }
@@ -499,7 +513,7 @@ class Event extends Model
         } catch (Throwable $e) {
             DB::rollBack();
 
-            \Log::error("イベント登録時にエラーが発生しました。エラー内容は下記です。登録内容:", $request);
+            \Log::error(self::ERRORS['MESSAGE']['UPDATE'], $request);
             \Log::error($e);
 
         }
