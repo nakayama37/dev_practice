@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Socialite;
+use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\RegistrationConfirmation;
@@ -11,15 +12,21 @@ use Illuminate\Support\Facades\Mail;
 
 class LineLoginController extends Controller
 {
+
+    private $addFriendUrl;
     /**
-     * roles
+     * 友達追加URLをセットする
      *
      * @var
      * 
      *  ADD_FRIEND_URL: string,
      * 
      */
-    private const ADD_FRIEND_URL = config('services.line.add_friend_url');
+    public function __construct()
+    {
+        $this->addFriendUrl = config('services.line.add_friend_url');
+    }
+
     /**
      * lineログイン画面リダイレクト
      * 
@@ -40,6 +47,7 @@ class LineLoginController extends Controller
         try {
 
             $userModel = new User();
+            $addFriendUrl = $this->addFriendUrl;
 
             $lineUser  = Socialite::driver('line')->stateless()->user();
 
@@ -65,7 +73,7 @@ class LineLoginController extends Controller
                 $newUser = $userModel->storeByLineLogin($lineUser, $email, $lineUserId, $password);
 
                 // 確認メール送信
-                Mail::to($email)->send(new RegistrationConfirmation($newUser, $password, self::ADD_FRIEND_URL));
+                Mail::to($email)->send(new RegistrationConfirmation($newUser, $password, $addFriendUrl));
                 // ログイン
                 Auth::login($newUser, true);
             }

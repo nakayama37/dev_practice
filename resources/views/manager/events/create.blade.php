@@ -71,7 +71,7 @@
 
                         <div class="mt-4">
                             <x-input-label for="content" value="イベント詳細" />
-                            <x-textarea id="content" class="block mt-1 w-full" type="text" name="content" :value="old('content')" /></textarea>
+                            <x-textarea id="content" class="block mt-1 w-full" type="text" name="content"  />{{ old('content') }}</textarea>
                           
                         </div>
 

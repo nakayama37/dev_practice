@@ -37,32 +37,36 @@ class SendEventReminders extends Command
         
         $events = Event::where('start_at', '>=', Carbon::now())
             ->where('start_at', '<=', Carbon::now()->addDays(1))
+            ->where('is_public', true)
             ->get();
 
         // Line bot の設定
         $httpClient = new CurlHTTPClient(config('services.line.messaging_api_channel_token'));
         $lineBot = new LINEBot($httpClient, ['channelSecret' => config('services.line.messaging_api_channel_secret')]);
-
-        foreach ($events as $event) {
-            foreach ($event->users as $user) {
-                // Send email
-                Mail::to($user->email)->send(new EventReminderMail($event));
-                $this->info('リマインダーメールを送信しました: ' . $user->email);
-
-                // ユーザーIDがあればLine通知を行う
-                if ($user->line_id) {
-                    $message = new TextMessageBuilder('イベントのリマインダー: ' . $event->title . ' がまもなく開始されます。');
-                    $response = $lineBot->pushMessage($user->line_id, $message);
-
-                    if ($response->isSucceeded()) {
-                        $this->info('LINEリマインダーを送信しました: ' . $user->line_id);
-                    } else {
-                        $this->error('LINEリマインダーの送信に失敗しました: ' . $response->getRawBody());
+        if($events) {
+            foreach ($events as $event) {
+                foreach ($event->users as $user) {
+                    // Send email
+                    Mail::to($user->email)->send(new EventReminderMail($event));
+                    $this->info('リマインダーメールを送信しました: ' . $user->email);
+    
+                    // ユーザーIDがあればLine通知を行う
+                    if ($user->line_id) {
+                        $message = new TextMessageBuilder('イベントのリマインダー: ' . $event->title . ' がまもなく開始されます。');
+                        $response = $lineBot->pushMessage($user->line_id, $message);
+    
+                        if ($response->isSucceeded()) {
+                            $this->info('LINEリマインダーを送信しました: ' . $user->line_id);
+                        } else {
+                            $this->error('LINEリマインダーの送信に失敗しました: ' . $response->getRawBody());
+                        }
                     }
                 }
             }
+        } else {
+            $this->info('翌日のイベントはありません');
         }
 
-        return 0;
+        return;
     }
 }

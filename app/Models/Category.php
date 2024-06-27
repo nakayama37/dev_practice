@@ -100,7 +100,7 @@ class Category extends Model
                 ->where('events.is_public', true)
                 ->whereDate('events.start_at', '>=', $today)
                 ->orderBy('events.start_at', 'asc')
-                ->select('events.*', 'participants.number_of_people', 'likes.like_count', 'comments.comment_count'); // 必要なフィールドを選択
+                ->select('events.*', 'participants.number_of_people', 'likes.like_count', 'comments.comment_count'); 
         }, 'events.location'])
         ->paginate(10);
 

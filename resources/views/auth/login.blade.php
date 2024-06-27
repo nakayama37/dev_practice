@@ -45,9 +45,10 @@
         </div>
     </form>
 
-    <!-- LINEログインボタン -->
-    <a href="{{ route('line.login') }}">
-        <img src="https://developers.line.biz/media/line-login-button/lbtn_en.png" alt="LINEでログイン">
+   <!-- LINEログインボタン -->
+    <a href="{{ route('line.login') }}" class="flex items-center no-underline">
+        <img src="{{ asset('storage/line_icon.png') }}" alt="LINEでログイン" class="w-6 h-6 mr-2">
+        <p class="text-base text-black">LINEでログイン</p>
     </a>
     
 </x-guest-layout>
