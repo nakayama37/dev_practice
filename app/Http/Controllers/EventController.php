@@ -321,6 +321,8 @@ class EventController extends Controller
         // イベント場所作成
         $locationModel->createEventLocation($event->id, $request);
 
+        
+
         // 登録成功のセッション
         session()->flash('status', 'イベントを登録しました');
 

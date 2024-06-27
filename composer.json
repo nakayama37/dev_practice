@@ -12,7 +12,8 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "linecorp/line-bot-sdk": "^1.1.0",
-        "socialiteproviders/line": "^4.1"
+        "socialiteproviders/line": "^4.1",
+        "stripe/stripe-php": "^15.0"
     },
     "require-dev": {
         "askdkc/breezejp": "^1.8",

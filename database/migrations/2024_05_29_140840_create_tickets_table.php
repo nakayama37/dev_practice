@@ -14,10 +14,8 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('event_id');
-            $table->enum('type', ['GA', 'VIP']);
             $table->unsignedDecimal('price', $precision = 10, $scale = 2)->default(0);
             $table->unsignedInteger('quantity')->default(0);
-            $table->boolean('is_paid')->default(false);
             $table->timestamps();
         });
     }

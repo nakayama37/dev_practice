@@ -28,7 +28,7 @@ Route::get('/events/search', [EventController::class, 'search'])->name('events.s
 | admin Routes
 |--------------------------------------------------------------------------
 |
-| 管理者以上権限のルート
+| オーナー以上権限のルート
 |
 */
 Route::prefix('admin')
@@ -53,6 +53,8 @@ Route::prefix('manager')
     ->middleware('can:manager-higher')->group(function () {
         Route::get('events/past', [EventController::class, 'past'])->name('events.past');
         Route::resource('events', EventController::class);
+
+    
     });
 /*
 |--------------------------------------------------------------------------

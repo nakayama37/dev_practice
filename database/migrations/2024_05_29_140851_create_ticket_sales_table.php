@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('ticket_sales', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
             $table->unsignedInteger('ticket_id');
+            $table->unsignedInteger('user_id');
             $table->unsignedInteger('quantity')->default(0);
             $table->unsignedDecimal('total_price', $precision = 10, $scale = 2)->default(0);
             $table->enum('status', ['pending', 'completed', 'cancelled']);
-            $table->boolean('is_paid')->default(false);
             $table->timestamps();
         });
     }
