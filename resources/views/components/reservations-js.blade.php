@@ -17,6 +17,18 @@
           const commentsList = document.getElementById('comments-list');
           const eventId = likeButton.getAttribute('data-event-id');
 
+          const eventPrice = document.getElementById('price').textContent;
+          //   
+          if(eventPrice !== '無料'){
+              // Stripe.js
+            const style = {};
+            const stripe = Stripe('{{ config('services.stripe.key') }}');
+            const elements = stripe.elements();
+            const cardElement = elements.create('card', { style: style });
+            cardElement.mount('#card-element');          
+          }
+
+
           //いいね登録時リクエストリクエストを複数送れないようにする
           let isRequestInProgress = false;
      /**
@@ -169,6 +181,77 @@
                     console.error('Error:', error);
                 });
             };
+
+
+     /**
+     * Stripe js(payments)
+     * 
+     */
+            document.querySelector('#payment-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            // console.log('start submit');
+              const paymentStatus = document.getElementById('payment-status');
+              const paymentMessage = document.getElementById('payment-message');
+              const paymentButton = document.getElementById('payment-button');
+
+              paymentStatus.classList.remove('hidden');
+              paymentMessage.textContent = '支払い中...';
+              paymentButton.disabled = true; // ボタンを非活性にする
+
+             const response = await fetch('/reservations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({
+                        event_id: document.querySelector('#event_id').value,
+                        quantity: document.querySelector('#number_of_people').value,
+                    }),
+             });
+
+             const data = await response.json();
+               if (data.clientSecret) {
+               //   console.log('client  secret');
+                const { paymentIntent, error } = await stripe.confirmCardPayment(data.clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            name: 'Customer Name',
+                        },
+                    },
+                });
+
+                if (error) {
+                     paymentMessage.textContent = '支払いエラーが発生しました。';
+                     paymentButton.disabled = false;
+                    console.error(error);
+                } else if (paymentIntent.status === 'succeeded') {
+                //   console.log('start fetch complete');
+                    const completeResponse = await fetch('/complete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: JSON.stringify({
+                            event_id: document.querySelector('#event_id').value,
+                            quantity: document.querySelector('#number_of_people').value,
+                            payment_intent_id: paymentIntent.id,
+                        }),
+                    });
+
+                    const result = await completeResponse.json();
+                    console.log(result.message);
+                    paymentMessage.textContent = '支払いが完了し、チケットを購入しました。メールをご確認ください';
+                    paymentButton.disabled = true; // 支払い完了後にボタンを非活性にする
+                }
+              } else {
+                console.log(data.message);
+                paymentMessage.textContent = '支払い処理中にエラーが発生しました。';
+                paymentButton.disabled = false; // エラーが発生した場合、ボタンを再度有効にする
+             }
+          });
 
       }); 
 </script>

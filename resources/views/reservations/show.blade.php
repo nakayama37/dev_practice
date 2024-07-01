@@ -1,4 +1,5 @@
 <x-app-layout>
+  <script src="https://js.stripe.com/v3/"></script>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             イベント詳細
@@ -68,6 +69,11 @@
                                 <x-input-label for="reservablePeople" value="参加可能人数" />
                                 {{ $reservablePeople }}
                              </div>
+                             <div class="mx-4">
+                                <x-input-label for="price" value="イベント価格" />
+                               <p id="price">{{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}</p> 
+                              
+                             </div>
                           </div>
                           <div class="mt-4">
                             <x-input-label for="content" value="イベント詳細" />
@@ -76,18 +82,27 @@
                           @if($reservablePeople <= 0)
                             <span class="text-lg text-red-500">このイベントは満員です</span>
                             @else
-                            <form method="POST" action="{{ route('reservations.join') }}">
+                            <form  id="payment-form">
                               @csrf
+                            <input id="event_id" type="hidden" name="event_id" value="{{ $event->id }}">
                             <div class="mt-4">
                               <x-input-label for="number_of_people" value="参加人数" />
                               <x-text-input id="number_of_people"  class="block mt-1" type="number" name="number_of_people" required min="1"/>
                             </div>
                             </div>
-                            <input type="hidden" name="event_id" value="{{ $event->id }}">
                             @if($isReserved === null)
                             {{-- 過去のイベントの場合非表示 --}}
-                              @if($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日') || $event->max_people > $participantCount)
-                              <x-primary-button class="ms-3">
+                            @if($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日') || $event->max_people > $participantCount)
+                            @if($event->price > 0)
+                            <div class="text-left lg:w-2/3 mt-4">
+                              <div id="payment-status" class="hidden text-center mt-4">
+                                  <p id="payment-message"></p>
+                              </div>
+                                <label for="card-element" class="pr-32 block text-sm font-medium text-gray-700">クレジットカード情報</label>
+                                <div id="card-element" class="mt-1 p-2 border rounded-md"></div>
+                            </div>
+                            @endif
+                              <x-primary-button id="payment-button" class="mt-4">
                                 イベント参加
                               </x-primary-button>
                               @endif
@@ -124,5 +139,6 @@
         </div>
       </div>
       <x-cancel-js />
-      <x-likes-comments-js />
+      <x-reservations-js />
+     
 </x-app-layout>

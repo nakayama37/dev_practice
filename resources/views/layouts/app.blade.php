@@ -13,6 +13,7 @@
        
         <script src="https://cdn.jsdelivr.net/npm/tailwindcss-cdn@3.4.1/tailwindcss.js"></script>
         <script src="//unpkg.com/alpinejs" defer></script>
+        <script src="https://js.stripe.com/v3/"></script>
         @vite(['resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/flatpickr.js'

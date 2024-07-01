@@ -11,9 +11,12 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\Location;
 use App\Models\Category;
+use App\Models\Ticket;
+use App\Models\TicketSale;
 use App\Models\Participant;
 use App\Services\EventService;
 use App\Services\ImageService;
+use App\Services\TicketPurchaseService;
 
 
 
@@ -125,6 +128,7 @@ class EventController extends Controller
         $userModel = new User();
         $eventModel = new Event();
         $locationModel = new Location();
+        $ticketModel = new Ticket();
 
         // 主催者登録
         $user = User::findOrFail($user_id);
@@ -148,6 +152,9 @@ class EventController extends Controller
         // イベント場所作成
         $locationModel->createEventLocation($event->id, $request);
 
+        // イベントチケット作成
+        $ticketModel->createTicket($event->id, $request);
+
         // 登録成功のセッション
         session()->flash('status', self::MESSAGES['SUCCESS']['STORE_EVENT']);
 
@@ -160,6 +167,7 @@ class EventController extends Controller
 | home
 | detail
 | join
+| completePayment
 |
 */
     /**
@@ -225,12 +233,10 @@ class EventController extends Controller
      * @param $request
      * @return view
      */
-    public function join(StoreParticipantRequest $request)
+    public function join(Request $request)
     {
         // 変数宣言
         $reservablePeople = 0;
-        // 現在認証しているユーザーのIDを取得
-        $user = Auth::user();
 
         // イベント情報取得
         $event = Event::findOrFail($request['event_id']);
@@ -243,8 +249,8 @@ class EventController extends Controller
             $reservablePeople = $event->max_people - $reservedPeople->number_of_people;
             // イベントが参加可能且つ、リクエスト参加人数が参加可能人数以下の場合、登録
             if ($reservablePeople > 0 && $reservablePeople >= $request['number_of_people']) {
-                // イベント参加登録
-                EventService::join($user, $request, $event);
+                // チケット購入手続き
+                TicketPurchaseService::createPaymentIntent($request, $event);
                 
             } else {
                 // 定員オーバーの場合、登録しない
@@ -254,12 +260,37 @@ class EventController extends Controller
             }
         } else {
             // イベント参加者がいない場合
-            // イベント参加登録
-            EventService::join($user, $request, $event);
+            // チケット購入手続き
+            $paymentIntent = TicketPurchaseService::createPaymentIntent($request, $event);
             
         }
 
-        return to_route('home');
+        return response()->json([
+            'clientSecret' => $paymentIntent->client_secret,
+        ]);
+    }
+    /**
+     * 支払い履歴登録
+     * 
+     * @param $request
+     * @return view
+     */
+    public function completePayment(Request $request)
+    {
+        $event = Event::findOrFail($request->event_id);
+        $ticket = $event->ticket()->firstOrFail();
+
+        $totalAmount = $ticket->price * $request->quantity;
+        $user = Auth::user();
+
+        //イベント参加登録 
+        EventService::join($user, $request, $event);
+
+        // チケットの販売を記録
+        $ticketSaleModel = new TicketSale();
+        $ticketSaleModel->createTicketSale($ticket->id, $totalAmount, $request);
+
+        return response()->json(['message' => 'チケットの購入が完了しました']);
     }
 
     /*
@@ -317,6 +348,7 @@ class EventController extends Controller
 
         $eventModel = new Event();
         $locationModel = new Location();
+        $ticketModel = new Ticket();
 
         // 日付と時間を結合
         $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
@@ -336,7 +368,8 @@ class EventController extends Controller
         // イベント場所作成
         $locationModel->createEventLocation($event->id, $request);
 
-        
+        // イベントチケット作成
+        $ticketModel->createTicket($event->id, $request);
 
         // 登録成功のセッション
         session()->flash('status', self::MESSAGES['SUCCESS']['STORE_EVENT']);
@@ -408,6 +441,7 @@ class EventController extends Controller
         
         $eventModel = new Event();
         $locationModel = new Location();
+        $ticketModel = new Ticket();
 
         // 現在認証しているユーザーのIDを取得
         $user_id = Auth::id();
@@ -432,6 +466,9 @@ class EventController extends Controller
         
         // 場所編集
         $locationModel->updateEventLocation($event, $request);
+
+        // イベントチケット編集
+        $ticketModel->updateTicket($event, $request);
 
         // 登録成功のセッション
         session()->flash('status', self::MESSAGES['SUCCESS']['UPDATE_EVENT']);

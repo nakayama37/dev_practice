@@ -17,7 +17,8 @@ return new class extends Migration
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('quantity')->default(0);
             $table->unsignedDecimal('total_price', $precision = 10, $scale = 2)->default(0);
-            $table->enum('status', ['pending', 'completed', 'cancelled']);
+            $table->enum('status', ['pending', 'completed', 'cancelled'])->default('pending');
+            $table->string('payment_intent_id', 255)->nullable();
             $table->timestamps();
         });
     }

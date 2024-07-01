@@ -94,7 +94,7 @@ class Participant extends Model
 
             // すでに同じイベントに参加しているか確認
             $exists = self::where('user_id', $user_id)
-                ->where('event_id', $request['event_id'])
+                ->where('event_id', $request->event_id)
                 ->whereNull('canceled_at')
                 ->exists();
 
@@ -105,9 +105,9 @@ class Participant extends Model
             } else {
                 
                 self::create([
-                    'event_id' => $request['event_id'],
+                    'event_id' => $request->event_id,
                     'user_id' => $user_id,
-                    'number_of_people' => $request['number_of_people'],
+                    'number_of_people' => $request->quantity,
                     
                 ]);
 

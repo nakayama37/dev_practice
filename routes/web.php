@@ -64,16 +64,18 @@ Route::prefix('manager')
 | 利用者以上権限のルート
 |
 */
- Route::middleware('can:user-higher')->group(function () {
+Route::middleware('can:user-higher')->group(function () {
     Route::get('/home', [EventController::class, 'home'])->name('home');
     Route::get('/mypage', [MyPageController::class, 'index'])->name('mypage.index');
     Route::get('/mypage/{id}', [MyPageController::class, 'show'])->name('mypage.show');
     Route::post('/mypage/{id}', [MyPageController::class, 'cancel'])->name('mypage.cancel');
     Route::post('/reservations', [EventController::class, 'join'])->name('reservations.join');
+    Route::post('/complete', [EventController::class, 'completePayment'])->name('complete.payment');
     Route::post('/events/{event}/like', [LikeController::class, 'toggleLike'])->name('events.like');
     Route::get('/events/{event}/comments', [CommentController::class, 'index'])->name('comments.index');
     Route::post('/events/{event}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
 });
 /*
 |--------------------------------------------------------------------------
@@ -83,32 +85,32 @@ Route::prefix('manager')
 | 利用者のみ権限のルート
 |
 */
- Route::prefix('user')
-    ->middleware('can:user-only')->group(function () {
-        Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
+Route::prefix('user')
+->middleware('can:user-only')->group(function () {
+    Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
         Route::post('/events', [EventController::class, 'storeByOnlyUser'])->name('user.events.store');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Routes
-|--------------------------------------------------------------------------
-|
-| イベント詳細のみログイン必須
-|
-*/
-Route::middleware('auth')->get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
-/*
-|--------------------------------------------------------------------------
-| Routes
-|--------------------------------------------------------------------------
-|
-| Api
-|
-*/
-Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
-/*
-|--------------------------------------------------------------------------
+    });
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Routes
+    |--------------------------------------------------------------------------
+    |
+    | イベント詳細のみログイン必須
+    |
+    */
+    Route::middleware('auth')->get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
+    /*
+    |--------------------------------------------------------------------------
+    | Routes
+    |--------------------------------------------------------------------------
+    |
+    | Api
+    |
+    */
+    Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
+    /*
+    |--------------------------------------------------------------------------
 | Line login
 |--------------------------------------------------------------------------
 |

@@ -23,7 +23,7 @@ class AddressController extends Controller
             $prefecture = $result['address1'];
             $city = $result['address2'];
             $street = $result['address3'];
-            // $fullAddress = $result['address1'] . $result['address2'] . $result['address3'];
+          
             return response()->json([
                 'status' => 200,
                 'results' => [

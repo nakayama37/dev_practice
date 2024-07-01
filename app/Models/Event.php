@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Category;
 use App\Models\Like;
 use App\Models\Location;
+use App\Models\Ticket;
 
 
 class Event extends Model
@@ -115,6 +116,14 @@ class Event extends Model
     public function location()
     {
         return $this->hasOne(Location::class);
+    }
+    /**
+     * Relation App\Models\Location
+     * @return hasOne
+     */
+    public function ticket()
+    {
+        return $this->hasOne(Ticket::class);
     }
 
         /*

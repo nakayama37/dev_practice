@@ -2,10 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Event;
-use App\Models\Participant;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 
 class MyPageService
 
