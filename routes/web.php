@@ -77,21 +77,8 @@ Route::middleware('can:user-higher')->group(function () {
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
 });
+
 /*
-|--------------------------------------------------------------------------
-| user-only Routes
-|--------------------------------------------------------------------------
-|
-| 利用者のみ権限のルート
-|
-*/
-Route::prefix('user')
-->middleware('can:user-only')->group(function () {
-    Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
-        Route::post('/events', [EventController::class, 'storeByOnlyUser'])->name('user.events.store');
-    });
-    
-    /*
     |--------------------------------------------------------------------------
     | Routes
     |--------------------------------------------------------------------------
@@ -99,8 +86,9 @@ Route::prefix('user')
     | イベント詳細のみログイン必須
     |
     */
-    Route::middleware('auth')->get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
-    /*
+Route::middleware('auth')->get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
+
+/*
     |--------------------------------------------------------------------------
     | Routes
     |--------------------------------------------------------------------------
@@ -108,7 +96,7 @@ Route::prefix('user')
     | Api
     |
     */
-    Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
+Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
 /*
 |--------------------------------------------------------------------------
 | Line login
@@ -132,8 +120,20 @@ Route::middleware(['web'])->group(function () {
 
 Route::get('/etickets/{id}', [EticketController::class, 'show'])->name('etickets.show');
 Route::get('/etickets/{eticket}/check-in', [EticketsController::class, 'checkIn'])->name('etickets.checkIn');
-
-
+/*
+|--------------------------------------------------------------------------
+| user-only Routes
+|--------------------------------------------------------------------------
+|
+| 利用者のみ権限のルート
+|
+*/
+Route::prefix('user')
+->middleware('can:user-only')->group(function () {
+    Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
+        Route::post('/events', [EventController::class, 'storeByOnlyUser'])->name('user.events.store');
+    });
+    
 /*
 |--------------------------------------------------------------------------
 | Routes
