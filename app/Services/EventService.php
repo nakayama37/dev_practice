@@ -26,8 +26,9 @@ class EventService
    * @param  $user_id, $request
    * @return view
    */
-  public static function join($user, $request, $event) 
+  public static function join($user, $request, $event, $qr_code) 
   {
+
       $participantModel = new Participant();
       // // イベント参加の作成
       $joined = $participantModel->joinEvent($user->id, $request);
@@ -38,9 +39,9 @@ class EventService
 
         return to_route('home');
       }
-
+    
       // 確認メール送信
-      Mail::to($user->email)->send(new EventRegistrationConfirmation($event, $user));
+      Mail::to($user->email)->send(new EventRegistrationConfirmation($event, $user, $qr_code));
 
       // 登録成功のセッション
       session()->flash('status', 'イベント参加登録が完了し、確認メールを送信しました');  

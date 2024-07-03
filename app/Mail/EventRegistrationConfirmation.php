@@ -3,10 +3,7 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class EventRegistrationConfirmation extends Mailable
@@ -15,17 +12,18 @@ class EventRegistrationConfirmation extends Mailable
 
     public $event;
     public $user;
-    public $addFriendUrl;
+    public $qr_code;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($event, $user)
+    public function __construct($event, $user, $qr_code)
     {
         $this->event = $event;
         $this->user = $user;
+        $this->qr_code = $qr_code;
     }
 
     /**

@@ -77,7 +77,7 @@ class TicketSale extends Model
         DB::beginTransaction();
         try {
 
-            self::create([
+            $ticketSale = self::create([
                 'ticket_id' => $ticketId,
                 'user_id' => Auth::id(),
                 'total_price' => $totalAmount,
@@ -94,7 +94,7 @@ class TicketSale extends Model
             \Log::error($e);
         }
 
-        return;
+        return $ticketSale->id;
     }
 
 }

@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreEventRequest;
-use App\Http\Requests\StoreParticipantRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\Eticket;
 use App\Models\Location;
 use App\Models\Category;
 use App\Models\Ticket;
@@ -17,6 +17,7 @@ use App\Models\Participant;
 use App\Services\EventService;
 use App\Services\ImageService;
 use App\Services\TicketPurchaseService;
+use App\Services\EticketService;
 
 
 
@@ -175,13 +176,13 @@ class EventController extends Controller
      */
     public function home()
     {
+
         $categoryModel = new Category();
         $eventModel = new Event();
         
         $categories = $categoryModel->getEvents();
 
         $events = $eventModel->getEventRankings();
-
 
         return view('home', compact('categories', 'events'));
     }
@@ -283,12 +284,15 @@ class EventController extends Controller
         $totalAmount = $ticket->price * $request->quantity;
         $user = Auth::user();
 
-        //イベント参加登録 
-        EventService::join($user, $request, $event);
-
         // チケットの販売を記録
         $ticketSaleModel = new TicketSale();
-        $ticketSaleModel->createTicketSale($ticket->id, $totalAmount, $request);
+        $ticketSale = $ticketSaleModel->createTicketSale($ticket->id, $totalAmount, $request);
+
+        // Eチケット生成
+        $qrCodePath = EticketService::createEticket($ticketSale, $user->id);
+
+        //イベント参加登録 
+        EventService::join($user, $request, $event, $qrCodePath);
 
         return response()->json(['message' => 'チケットの購入が完了しました']);
     }

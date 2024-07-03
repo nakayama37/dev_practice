@@ -28,33 +28,34 @@ class SendEventReminders extends Command
     protected $description = 'Send reminder emails and LINE notifications for upcoming events';
 
     /**
-     * Execute the console command.
+     * イベントリマインダーの実行
      *
-     * @return int
+     * @return void
      */
     public function handle()
     {
-        
+        // Line bot の設定
+        $httpClient = new CurlHTTPClient(config('services.line.messaging_api_channel_token'));
+        $lineBot = new LINEBot($httpClient, ['channelSecret' => config('services.line.messaging_api_channel_secret')]);
+
+        //翌日のイベント取得 
         $events = Event::where('start_at', '>=', Carbon::now())
             ->where('start_at', '<=', Carbon::now()->addDays(1))
             ->where('is_public', true)
             ->get();
 
-        // Line bot の設定
-        $httpClient = new CurlHTTPClient(config('services.line.messaging_api_channel_token'));
-        $lineBot = new LINEBot($httpClient, ['channelSecret' => config('services.line.messaging_api_channel_secret')]);
-        if($events) {
+        if ($events) {
             foreach ($events as $event) {
                 foreach ($event->users as $user) {
                     // Send email
                     Mail::to($user->email)->send(new EventReminderMail($event));
                     $this->info('リマインダーメールを送信しました: ' . $user->email);
-    
-                    // ユーザーIDがあればLine通知を行う
+
+                    // lineIDがあればLine通知を行う
                     if ($user->line_id) {
                         $message = new TextMessageBuilder('イベントのリマインダー: ' . $event->title . ' がまもなく開始されます。');
                         $response = $lineBot->pushMessage($user->line_id, $message);
-    
+
                         if ($response->isSucceeded()) {
                             $this->info('LINEリマインダーを送信しました: ' . $user->line_id);
                         } else {

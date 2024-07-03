@@ -7,10 +7,13 @@
 </head>
 <body>
     <h1>{{ $user->name }}様</h1>
-    <p>以下のイベントに参加登録が完了しました。</p>
+    <p>以下のイベントのチケットを購入し、参加登録が完了しました。</p>
     <p>イベント名: {{ $event->title }}</p>
     <p>開催日時: {{ $event->start_at }} 〜 {{ $event->end_at }}</p>
-    {{-- <p>場所: {{ $event->venue }}</p> --}}
+    <p>以下のURLのQRコードをイベント会場でご提示ください。</p>
+    <div>
+          {{ asset('storage/' . $qr_code) }}
+    </div>
     <p>ご参加ありがとうございます。</p>
 </body>
 </html>

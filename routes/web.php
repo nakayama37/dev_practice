@@ -109,8 +109,8 @@ Route::prefix('user')
     |
     */
     Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
-    /*
-    |--------------------------------------------------------------------------
+/*
+|--------------------------------------------------------------------------
 | Line login
 |--------------------------------------------------------------------------
 |
@@ -121,6 +121,17 @@ Route::middleware(['web'])->group(function () {
     Route::get('line/login', [LineLoginController::class, 'redirectToProvider'])->name('line.login');
     Route::get('line/callback', [LineLoginController::class, 'handleProviderCallback']);
 });
+/*
+|--------------------------------------------------------------------------
+| Eticket reader
+|--------------------------------------------------------------------------
+|
+| Eticket読み取り画面
+|
+*/
+
+Route::get('/etickets/{id}', [EticketController::class, 'show'])->name('etickets.show');
+Route::get('/etickets/{eticket}/check-in', [EticketsController::class, 'checkIn'])->name('etickets.checkIn');
 
 
 /*

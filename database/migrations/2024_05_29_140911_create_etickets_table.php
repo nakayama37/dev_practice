@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('e_tickets', function (Blueprint $table) {
+        Schema::create('etickets', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('ticket_sale_id');
             $table->unsignedInteger('user_id');
             $table->string('ticket_number', 255);
-            $table->string('qr_code', 255);
+            $table->text('qr_code')->nullable();
             $table->dateTime('issued_at');
-            $table->dateTime('checked_in_at');
+            $table->dateTime('checked_in_at')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('e_tickets');
+        Schema::dropIfExists('etickets');
     }
 };

@@ -8,7 +8,6 @@
     <p>詳細は以下の通りです:</p>
     <ul>
         <li>開始時間: {{ $event->start_at }}</li>
-        {{-- <li>場所: {{ $event->location }}</li> --}}
     </ul>
 </body>
 </html>

@@ -18,15 +18,13 @@
           const eventId = likeButton.getAttribute('data-event-id');
 
           const eventPrice = document.getElementById('price').textContent;
-          //   
-          if(eventPrice !== '無料'){
-              // Stripe.js
+
+          // Stripe.js
             const style = {};
             const stripe = Stripe('{{ config('services.stripe.key') }}');
             const elements = stripe.elements();
             const cardElement = elements.create('card', { style: style });
             cardElement.mount('#card-element');          
-          }
 
 
           //いいね登録時リクエストリクエストを複数送れないようにする
@@ -189,7 +187,7 @@
      */
             document.querySelector('#payment-form').addEventListener('submit', async (event) => {
             event.preventDefault();
-            // console.log('start submit');
+            
               const paymentStatus = document.getElementById('payment-status');
               const paymentMessage = document.getElementById('payment-message');
               const paymentButton = document.getElementById('payment-button');
