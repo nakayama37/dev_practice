@@ -19,6 +19,7 @@ class MyPageService
     if($string === 'fromToday') {
       foreach ($events->sortBy('start_at') as $event) {
         if(is_null($event->pivot->canceled_at) && $event->start_at >= Carbon::now()->format('Y-m-d 00:00:00')) {
+          
           $eventInfo = [
             'id' => $event->id,
             'title' => $event->title,

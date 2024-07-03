@@ -24,7 +24,8 @@
                                 <h4 class="text-sm leading-6 text-gray-900"> 場所：{{ $event->location->venue }}</h4>
                                 <div class="flex justify-between items-center mt-4">
                                     <span
-                                        class="text-2xl font-extrabold text-gray-900">{{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}</span>
+                                        class="text-2xl font-extrabold text-gray-900">{{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}
+                                    </span>
                                     <span
                                         class="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
                                         ❤ {{ $event->like_count !== null ? $event->like_count : '0' }}

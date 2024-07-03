@@ -51,8 +51,13 @@
                 <div id="event-item" class="cursor-pointer p-4 md:w-1/3"
                     onclick="location.href='{{ route('reservations.detail', ['event' => $event->id]) }}'">
                     <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-                        <img class="lg:h-48 md:h-36 w-full object-cover object-center"
-                            src="https://dummyimage.com/720x400" alt="blog">
+                         @if (is_null($event->image))
+                            <img src="{{ asset('storage/events/No_Image.png') }}" alt=""
+                                    class="w-full h-60 object-cover">
+                         @else
+                            <img src="{{ asset('storage/events/' . $event->image) }}" alt=""
+                                    class="w-full h-60 object-cover">
+                         @endif
                         <div class="p-6">
                             <div class="flex flex-wrap justify-start mx-2">
                                 @foreach ($event->categories as $category)
@@ -64,15 +69,11 @@
                             <p class="leading-relaxed mb-3">{{ $event->event_date }}</p>
                             <p class="leading-relaxed mb-3">場所：{{ $event->location->venue }}</p>
                             <p class="leading-relaxed mb-3">
-                                {{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}</p>
+                                {{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}
+                            </p>
                             <div class="flex items-center flex-wrap ">
-                                <span
-                                    class="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
-                                    <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none"
-                                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>{{ $event->like_count !== null ? $event->like_count : '0' }}
+                                <span class="text-gray-400 mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r-2 border-gray-200">
+                                        ❤ {{ $event->like_count !== null ? $event->like_count : '0' }}
                                 </span>
                                 <span class="text-gray-400 inline-flex items-center leading-none text-sm">
                                     <svg class="w-4 h-4 mr-1" stroke="currentColor" stroke-width="2" fill="none"

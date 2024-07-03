@@ -8,7 +8,6 @@ use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\User;
 use App\Models\Event;
-use App\Models\Eticket;
 use App\Models\Location;
 use App\Models\Category;
 use App\Models\Ticket;
@@ -288,11 +287,8 @@ class EventController extends Controller
         $ticketSaleModel = new TicketSale();
         $ticketSale = $ticketSaleModel->createTicketSale($ticket->id, $totalAmount, $request);
 
-        // Eチケット生成
-        $qrCodePath = EticketService::createEticket($ticketSale, $user->id);
-
         //イベント参加登録 
-        EventService::join($user, $request, $event, $qrCodePath);
+        EventService::join($user, $request, $event, $ticketSale);
 
         return response()->json(['message' => 'チケットの購入が完了しました']);
     }

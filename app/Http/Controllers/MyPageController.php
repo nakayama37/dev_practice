@@ -21,7 +21,9 @@ class MyPageController extends Controller
     public function index()
     {
         $user = User::findOrFail(Auth::id());
-        $events = $user->events;
+        // $events = $user->events;
+        $events = $user->events()->with(['categories', 'location'])->get();
+
         // 本日以降のマイイベント取得
         $fromTodayEvents = MyPageService::reservedEvent($events, 'fromToday');
         // 過去のマイイベント取得
@@ -41,7 +43,7 @@ class MyPageController extends Controller
     public function show($id)
     {
 
-        $event = Event::findOrFail($id);
+        $event = Event::with(['location', 'categories'])->findOrFail($id);
         // イベント参加者数取得
         $participantModel = new Participant();
         $reservation = $participantModel->getEventParticipant($id);
