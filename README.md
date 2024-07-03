@@ -23,8 +23,6 @@
 | LINE_MESSAGING_API_CHANNEL_ID     | LINEMessaging APIのチャンネルID               | LINED Developerコンソールで確認した値をコピぺ                                             | LINEのDeveloperコンソールで作成した、LINE Messaging APIのもの     | 
 | LINE_MESSAGING_API_ACCESS_TOKEN   | LINEMessaging APIのチャンネルアクセストークン | 同上                                                                                      | 同上                                                              | 
 | LINE_MESSAGING_API_CHANNEL_SECRET | LINEMessaging APIのチャンネルシークレット     | 同上                                                                                      | 同上                                                              | 
-| LINE_ADD_FRIEND_URL=              | 公式LINE友達追加URL                           | https://line.me/R/ti/p/{botのベーシックID}                                                | 同上                                                              | 
+| LINE_ADD_FRIEND_URL              | 公式LINE友達追加URL                           | https://line.me/R/ti/p/{botのベーシックID}                                                | 同上                                                              | 
 | STRIPE_PUBLIC_KEY                 | Stripeの公開キー                              | Stripeログインし、APIキーで確認した値                                                     | Stripeアカウントログインし、開発者のAPIキーのもの                 | 
 | STRIPE_SECRET_KEY                 | Stripeのシークレットキー                      | 同上                                                                                      | 同上                                                              | 
-|                                   |                                               |                                                                                           |                                                                   | 
- 
