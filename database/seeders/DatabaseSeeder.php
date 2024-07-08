@@ -9,6 +9,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\Location;
+use App\Models\Ticket;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
         Event::factory(100)->create();
         EventCategory::factory(100)->create();
         Location::factory(100)->create();
+        Ticket::factory(100)->create();
         $this->call([
             UserSeeder::class,
             ParticipantSeeder::class,

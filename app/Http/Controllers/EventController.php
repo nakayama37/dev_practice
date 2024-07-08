@@ -38,6 +38,34 @@ class EventController extends Controller
         ]
     ];
 
+    /**
+     * 画像をストレージへ保存
+     * 
+     * @param \Illuminate\Http\UploadedFile|null $imageFile
+     * @return string|null
+     */
+    private function storeImage($imageFile)
+    {
+        if (!is_null($imageFile) && $imageFile->isValid()) {
+            return ImageService::upload($imageFile, 'events');
+        }
+        return null;
+    }
+    /**
+     * 画像をストレージへ更新
+     * 
+     * @param \Illuminate\Http\UploadedFile|null $imageFile
+     * @return string|null
+     */
+    private function updateImage($imageFile, $event)
+    {
+        if (!is_null($imageFile) && $imageFile->isValid()) {
+
+            return ImageService::update($imageFile, 'events', $event->image);
+        }
+        return null;
+    }
+
     /*
 |--------------------------------------------------------------------------
 | ゲスト権限のコントローラー
@@ -121,43 +149,40 @@ class EventController extends Controller
     public function storeByOnlyUser(StoreEventRequest $request)
     {
         // 現在認証しているユーザーのIDを取得
-        $user_id = Auth::id();
+        $userId = Auth::id();
         $imageFile = $request->file('image');
         $fileNameToStore = null;
 
-        $userModel = new User();
-        $eventModel = new Event();
-        $locationModel = new Location();
-        $ticketModel = new Ticket();
-
         // 主催者登録
-        $user = User::findOrFail($user_id);
+        $userModel = new User();
+        $user = User::findOrFail($userId);
         $userModel->joinManager($user);
-
+        
         // 日付と時間を結合
         $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
-
+        
         //画像をストレージへ保存 
-        if (!is_null($imageFile) && $imageFile->isValid()) {
-            $fileNameToStore = ImageService::upload($imageFile, 'events');
-        }
-
+        $fileNameToStore = $this->storeImage($imageFile);
+        
         // イベントの作成
-        $event =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
-
+        $eventModel = new Event();
+        $event =  $eventModel->createEvent($request, $userId, $startDate, $endDate, $fileNameToStore);
+        
         // イベントカテゴリーの作成
         $event->categories()->sync($request['categories']);
-
+        
         // イベント場所作成
+        $locationModel = new Location();
         $locationModel->createEventLocation($event->id, $request);
-
+        
         // イベントチケット作成
+        $ticketModel = new Ticket();
         $ticketModel->createTicket($event->id, $request);
 
         // 登録成功のセッション
         session()->flash('status', self::MESSAGES['SUCCESS']['STORE_EVENT']);
-
+        
         return to_route('events.index');
     }
     /*
@@ -177,10 +202,9 @@ class EventController extends Controller
     {
 
         $categoryModel = new Category();
-        $eventModel = new Event();
-        
         $categories = $categoryModel->getEvents();
-
+        
+        $eventModel = new Event();
         $events = $eventModel->getEventRankings();
 
         return view('home', compact('categories', 'events'));
@@ -342,35 +366,33 @@ class EventController extends Controller
     public function store(StoreEventRequest $request)
     {
     
-        $user_id = Auth::id();
+        $userId = Auth::id();
         $imageFile = $request->file('image');
         $fileNameToStore = null;
 
-        $eventModel = new Event();
-        $locationModel = new Location();
-        $ticketModel = new Ticket();
-
+        
         // 日付と時間を結合
         $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
-
+        
         //画像をストレージへ保存 
-        if (!is_null($imageFile) && $imageFile->isValid()) {
-            $fileNameToStore = ImageService::upload($imageFile, 'events');
-        }
-
+        $fileNameToStore = $this->storeImage($imageFile);
+        
         // イベントの作成
-        $event =  $eventModel->createEvent($request, $user_id, $startDate, $endDate, $fileNameToStore);
-
+        $eventModel = new Event();
+        $event =  $eventModel->createEvent($request, $userId, $startDate, $endDate, $fileNameToStore);
+        
         // イベントカテゴリーの作成
         $event->categories()->sync($request['categories']);
-
+        
         // イベント場所作成
+        $locationModel = new Location();
         $locationModel->createEventLocation($event->id, $request);
-
+        
         // イベントチケット作成
+        $ticketModel = new Ticket();
         $ticketModel->createTicket($event->id, $request);
-
+        
         // 登録成功のセッション
         session()->flash('status', self::MESSAGES['SUCCESS']['STORE_EVENT']);
 
@@ -439,13 +461,10 @@ class EventController extends Controller
     public function update(UpdateEventRequest $request, Event $event)
     {
         
-        $eventModel = new Event();
-        $locationModel = new Location();
-        $ticketModel = new Ticket();
-
+        
         // 現在認証しているユーザーのIDを取得
         $user_id = Auth::id();
-
+        
         $imageFile = $request->file('image');
         $fileNameToStore = null;
         // 日付と時間を結合
@@ -453,21 +472,21 @@ class EventController extends Controller
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
 
         // 画像の編集
-        if (!is_null($imageFile) && $imageFile->isValid()) {
-    
-            $fileNameToStore = ImageService::update($imageFile, 'events', $event->image);
-        }
+        $fileNameToStore = $this->updateImage($imageFile, $event);
         
         // イベントの編集
+        $eventModel = new Event();
         $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate, $fileNameToStore);
         
         // カテゴリ編集
         $event->categories()->sync($request['categories']);
         
         // 場所編集
+        $locationModel = new Location();
         $locationModel->updateEventLocation($event, $request);
-
+        
         // イベントチケット編集
+        $ticketModel = new Ticket();
         $ticketModel->updateTicket($event, $request);
 
         // 登録成功のセッション

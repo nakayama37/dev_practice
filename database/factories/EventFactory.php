@@ -26,7 +26,8 @@ class EventFactory extends Factory
         'content' => $this->faker->realText,
         'start_at' => $startAt,
         'end_at' => $endAt,
-        'max_people' => $this->faker->numberBetween(1, 20),
+        'max_people' => 20,
+        'price' => 1000,
         'is_public' => $this->faker->boolean,
         'is_paid' => $this->faker->boolean
       ];
