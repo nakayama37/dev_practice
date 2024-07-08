@@ -97,7 +97,9 @@ cd app
 ```bash
 npm install
 ```
-
+```bash
+npm run build
+```
 ## テストアカウント
 利用者権限
 ```bash
