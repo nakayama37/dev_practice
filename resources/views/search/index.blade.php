@@ -52,7 +52,7 @@
                     onclick="location.href='{{ route('reservations.detail', ['event' => $event->id]) }}'">
                     <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
                          @if (is_null($event->image))
-                            <img src="{{ asset('storage/events/No_Image.png') }}" alt=""
+                            <img src="{{ asset('storage/No_Image.png') }}" alt=""
                                     class="w-full h-60 object-cover">
                          @else
                             <img src="{{ asset('storage/events/' . $event->image) }}" alt=""

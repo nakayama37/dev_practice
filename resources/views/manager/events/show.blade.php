@@ -16,7 +16,7 @@
                             <div class="container mx-auto flex px-5 py-12 items-center justify-center flex-col">
                                 @if (is_null($event->image))
                                     <img class="lg:w-2/6 md:w-3/6 w-5/6 mb-10 object-cover object-center rounded"
-                                        alt="hero" src="{{ asset('storage/events/No_Image.png') }}">
+                                        alt="hero" src="{{ asset('storage/No_Image.png') }}">
                                 @else
                                     <img class="lg:w-2/6 md:w-3/6 w-5/6 mb-10 object-cover object-center rounded"
                                         alt="hero" src="{{ asset('storage/events/' . $event->image) }}">

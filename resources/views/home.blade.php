@@ -12,7 +12,7 @@
                         onclick="location.href='{{ route('reservations.detail', ['event' => $event->id]) }}'">
                         <div class="bg-white border-1 border border-gray-200 rounded-lg overflow-hidden mb-4">
                             @if (is_null($event->image))
-                                <img src="{{ asset('storage/events/No_Image.png') }}" alt=""
+                                <img src="{{ asset('storage/No_Image.png') }}" alt=""
                                     class="w-full h-40 object-cover">
                             @else
                                 <img src="{{ asset('storage/events/' . $event->image) }}" alt=""
@@ -60,7 +60,7 @@
                                 onclick="location.href='{{ route('reservations.detail', ['event' => $event->id]) }}'">
                                 <div class="bg-white border-1 border border-gray-200 rounded-lg overflow-hidden mb-4">
                                     @if (is_null($event->image))
-                                        <img src="{{ asset('storage/events/No_Image.png') }}" alt=""
+                                        <img src="{{ asset('storage/No_Image.png') }}" alt=""
                                             class="w-full h-40 object-cover">
                                     @else
                                         <img src="{{ asset('storage/events/' . $event->image) }}" alt=""
