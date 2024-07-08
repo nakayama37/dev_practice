@@ -7,7 +7,7 @@
 ### 言語
 * HTML
 * CSS
-* PHP : 8.2
+* PHP : 8.2 ※laravel10は、php v8以上が必要
 * javascript
 ### フレームワーク
 * Laravel：10.10
