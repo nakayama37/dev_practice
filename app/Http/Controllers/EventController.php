@@ -41,27 +41,18 @@ class EventController extends Controller
     /**
      * 画像をストレージへ保存
      * 
-     * @param \Illuminate\Http\UploadedFile|null $imageFile
+     * @param  $imageFile, $string
      * @return string|null
      */
-    private function storeImage($imageFile)
+    private function storeImage($imageFile, $event, $string)
     {
         if (!is_null($imageFile) && $imageFile->isValid()) {
-            return ImageService::upload($imageFile, 'events');
-        }
-        return null;
-    }
-    /**
-     * 画像をストレージへ更新
-     * 
-     * @param \Illuminate\Http\UploadedFile|null $imageFile
-     * @return string|null
-     */
-    private function updateImage($imageFile, $event)
-    {
-        if (!is_null($imageFile) && $imageFile->isValid()) {
-
-            return ImageService::update($imageFile, 'events', $event->image);
+            if($string === 'store') {
+                    return ImageService::upload($imageFile, 'events');
+                }
+            if($string === 'update') {
+                return ImageService::update($imageFile, 'events', $event->image);
+                }
         }
         return null;
     }
@@ -163,7 +154,7 @@ class EventController extends Controller
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
         
         //画像をストレージへ保存 
-        $fileNameToStore = $this->storeImage($imageFile);
+        $fileNameToStore = $this->storeImage($imageFile, null, 'store');
         
         // イベントの作成
         $eventModel = new Event();
@@ -376,7 +367,7 @@ class EventController extends Controller
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
         
         //画像をストレージへ保存 
-        $fileNameToStore = $this->storeImage($imageFile);
+        $fileNameToStore = $this->storeImage($imageFile, null, 'store');
         
         // イベントの作成
         $eventModel = new Event();
@@ -472,7 +463,7 @@ class EventController extends Controller
         $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
 
         // 画像の編集
-        $fileNameToStore = $this->updateImage($imageFile, $event);
+        $fileNameToStore = $this->storeImage($imageFile, $event, 'update');
         
         // イベントの編集
         $eventModel = new Event();
