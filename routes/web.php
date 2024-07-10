@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Database\Capsule\Manager;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyPageController;
@@ -79,23 +78,37 @@ Route::middleware('can:user-higher')->group(function () {
 });
 
 /*
-    |--------------------------------------------------------------------------
-    | Routes
-    |--------------------------------------------------------------------------
-    |
-    | イベント詳細のみログイン必須
-    |
-    */
+|--------------------------------------------------------------------------
+| user-only Routes
+|--------------------------------------------------------------------------
+|
+| 利用者のみ権限のルート
+|
+*/
+Route::prefix('user')
+    ->middleware('can:user-only')->group(function () {
+        Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
+        Route::post('/events', [EventController::class, 'storeByOnlyUser'])->name('user.events.store');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Routes
+|--------------------------------------------------------------------------
+|
+| イベント詳細のみログイン必須
+|
+*/
 Route::middleware('auth')->get('/reservations/{event}', [EventController::class, 'detail'])->name('reservations.detail');
 
 /*
-    |--------------------------------------------------------------------------
-    | Routes
-    |--------------------------------------------------------------------------
-    |
-    | Api
-    |
-    */
+|--------------------------------------------------------------------------
+| Routes
+|--------------------------------------------------------------------------
+|
+| Api
+|
+ */
 Route::get('/api/get-address/{postcode}', [AddressController::class, 'getAddress']);
 /*
 |--------------------------------------------------------------------------
@@ -120,19 +133,6 @@ Route::middleware(['web'])->group(function () {
 
 Route::get('/etickets/{id}', [EticketController::class, 'show'])->name('etickets.show');
 Route::get('/etickets/{eticket}/check-in', [EticketsController::class, 'checkIn'])->name('etickets.checkIn');
-/*
-|--------------------------------------------------------------------------
-| user-only Routes
-|--------------------------------------------------------------------------
-|
-| 利用者のみ権限のルート
-|
-*/
-Route::prefix('user')
-->middleware('can:user-only')->group(function () {
-    Route::get('/events', [EventController::class, 'createByOnlyUser'])->name('user.events.create');
-        Route::post('/events', [EventController::class, 'storeByOnlyUser'])->name('user.events.store');
-    });
     
 /*
 |--------------------------------------------------------------------------
