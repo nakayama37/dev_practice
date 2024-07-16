@@ -23,7 +23,10 @@
             const style = {};
             const stripe = Stripe('{{ config('services.stripe.key') }}');
             const elements = stripe.elements();
-            const cardElement = elements.create('card', { style: style });
+            const cardElement = elements.create('card', { 
+                style: style,
+                hidePostalCode: true
+            });
             cardElement.mount('#card-element');          
 
 
