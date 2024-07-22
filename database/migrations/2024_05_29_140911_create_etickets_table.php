@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('ticket_number', 255);
             $table->text('qr_code')->nullable();
             $table->dateTime('issued_at');
-            $table->dateTime('checked_in_at')->nullable();
             $table->timestamps();
         });
     }

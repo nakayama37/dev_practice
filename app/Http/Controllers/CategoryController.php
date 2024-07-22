@@ -70,7 +70,7 @@ class CategoryController extends Controller
         // 登録成功のセッション
         session()->flash('status', self::MESSAGES['SUCCESS']['STORE_CATEGORY']);
 
-        return to_route('admin.categories.index');
+        return to_route('categories.index');
     }
 
     /**

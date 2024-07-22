@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyPageController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\EticketController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Auth\LineLoginController;
 use App\Http\Controllers\Api\AddressController;
@@ -132,7 +133,7 @@ Route::middleware(['web'])->group(function () {
 */
 
 Route::get('/etickets/{id}', [EticketController::class, 'show'])->name('etickets.show');
-Route::get('/etickets/{eticket}/check-in', [EticketsController::class, 'checkIn'])->name('etickets.checkIn');
+Route::get('/etickets/{eticket}/check-in', [EticketController::class, 'checkIn'])->name('etickets.checkIn');
     
 /*
 |--------------------------------------------------------------------------

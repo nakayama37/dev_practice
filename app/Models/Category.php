@@ -114,6 +114,31 @@ class Category extends Model
      * @param  $caategory, $id
      * @return void
      */
+    public function createCategory($request)
+    {
+
+        DB::beginTransaction();
+        try {
+              self::create([
+                'name' => $request['name'],
+            ]);
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            \Log::error("カテゴリー登録時にエラーが発生しました。エラー内容は下記です。変更内容:", $request);
+            \Log::error($e);
+        }
+
+        return;
+    }
+
+    /**
+     * カテゴリー公開、非公開変更
+     * @param  $caategory, $id
+     * @return void
+     */
     public function togglePublic($category, $flg)
     {
 
