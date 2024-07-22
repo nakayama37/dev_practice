@@ -63,6 +63,16 @@
                                 </div>
                                 <div class="md:flex justify-start mt-4">
                                     <div>
+                                        <x-input-label for="venue" value="イベント場所" />
+                                        {{ $event->location->venue }}
+                                    </div>
+                                    <div class="mx-2">
+                                        <x-input-label for="full_address" value="住所" />
+                                        〒{{ $event->location->full_address }}
+                                    </div>
+                                </div>
+                                <div class="md:flex justify-start mt-4">
+                                    <div>
                                         <x-input-label for="max_people" value="定員数" />
                                         {{ $event->max_people }}
                                     </div>
@@ -89,15 +99,15 @@
                                 @if ($reservablePeople <= 0)
                                     <span class="text-lg text-red-500">このイベントは満員です</span>
                                 @else
-                                <form id="payment-form">
-                                @csrf
-                                <input id="event_id" type="hidden" name="event_id"
-                                    value="{{ $event->id }}">
-                                <div class="mt-4">
-                                    <x-input-label for="number_of_people" value="参加人数" />
-                                    <x-text-input id="number_of_people" class="block mt-1" type="number"
-                                        name="number_of_people" required min="1" />
-                                </div>
+                                    <form id="payment-form">
+                                        @csrf
+                                        <input id="event_id" type="hidden" name="event_id"
+                                            value="{{ $event->id }}">
+                                        <div class="mt-4">
+                                            <x-input-label for="number_of_people" value="参加人数" />
+                                            <x-text-input id="number_of_people" class="block mt-1" type="number"
+                                                name="number_of_people" required min="1" />
+                                        </div>
                             </div>
                             <div class="text-left lg:w-2/3 mt-4">
                                 <div id="payment-status" class="hidden text-center mt-4">
@@ -118,7 +128,7 @@
                                 <span class="text-lg text-red-500">このイベントは既に予約済みです</span>
                             @endif
                             @endif
-                                </form>
+                            </form>
                         </div>
                     </section>
 

@@ -106,7 +106,7 @@ npm run build
 test@test.com
 pass123
 ```
-管理者権限
+主催者権限
 ```bash
 manager@manager.com
 pass123

@@ -27,11 +27,11 @@
                                         {{ $event->title }}</h1>
                                 </div>
                                 <div>
-                                        <x-input-label for="event_date" value="カテゴリー" />
-                                        @foreach ($event->categories as $category)
-                                            {{ $category->name }}
-                                        @endforeach
-                                  </div>
+                                    <x-input-label for="event_date" value="カテゴリー" />
+                                    @foreach ($event->categories as $category)
+                                        {{ $category->name }}
+                                    @endforeach
+                                </div>
                                 <div class="md:flex justify-start mt-4">
                                     <div>
                                         <x-input-label for="event_date" value="イベント日付" />
@@ -46,16 +46,16 @@
                                         {{ $event->endTime }}
                                     </div>
                                 </div>
-                                 <div class="md:flex justify-start mt-4">
-                                        <div>
-                                            <x-input-label for="venue" value="イベント場所" />
-                                            {{ $event->location->venue }}
-                                        </div>
-                                        <div class="mx-2">
-                                            <x-input-label for="full_address" value="住所" />
-                                            〒{{ $event->location->full_address }}
-                                        </div>
+                                <div class="md:flex justify-start mt-4">
+                                    <div>
+                                        <x-input-label for="venue" value="イベント場所" />
+                                        {{ $event->location->venue }}
                                     </div>
+                                    <div class="mx-2">
+                                        <x-input-label for="full_address" value="住所" />
+                                        〒{{ $event->location->full_address }}
+                                    </div>
+                                </div>
                                 <div class="my-4">
                                     <x-input-label for="max_people" value="参加者数" />
                                     @if ($reservation)
@@ -65,12 +65,12 @@
                                     @endif
                                 </div>
                                 <div class="my-4">
-                                        <x-input-label for="price" value="イベント価格" />
-                                        <p id="price">
-                                            {{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}
-                                        </p>
+                                    <x-input-label for="price" value="イベント価格" />
+                                    <p id="price">
+                                        {{ $event->formatted_price == 0 ? '無料' : $event->formatted_price . '円' }}
+                                    </p>
 
-                                    </div>
+                                </div>
 
                                 <div>
                                     <x-input-label for="content" value="イベント詳細" />

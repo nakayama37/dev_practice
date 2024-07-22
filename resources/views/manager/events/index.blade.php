@@ -61,7 +61,11 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-4 py-3">{{ $event->max_people }}</td>
-                                                <td class="px-4 py-3">{{ $event->is_public }}</td>
+                                                @if ($event->is_public == 0)
+                                                    <td class="px-4 py-3">非表示</td>
+                                                @else
+                                                    <td class="px-4 py-3">表示</td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>
