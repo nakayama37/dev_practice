@@ -27,10 +27,10 @@ class TicketSale extends Model
      */
     protected $fillable = [
         'ticket_id',           // イベントID
-        'user_id',           // イベントID
-        'quantity',               // チケットタイプ
-        'total_price',              // 価格
-        'status',           // 
+        'user_id',             // ユーザID
+        'quantity',            // 数量
+        'total_price',         // 価格
+        'status',              // 
         'payment_intent_id',
     ];
 

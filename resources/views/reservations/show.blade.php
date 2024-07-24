@@ -1,5 +1,7 @@
 <x-app-layout>
     <script src="https://js.stripe.com/v3/"></script>
+     <!-- Session Status -->
+    <x-success-session-status class="mb-4" :status="session('status')" />
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             イベント詳細
@@ -109,14 +111,24 @@
                                                 name="number_of_people" required min="1" />
                                         </div>
                             </div>
-                            <div class="text-left lg:w-2/3 mt-4">
-                                <div id="payment-status" class="hidden text-center mt-4">
-                                    <p id="payment-message"></p>
+                            @if ($event->formatted_price > 0)
+                                <div class="text-left lg:w-2/3 mt-4" id="payment-section">
+                                    <div id="payment-status" class="hidden text-center mt-4">
+                                        <p id="payment-message"></p>
+                                    </div>
+                                    <label for="card-element"
+                                        class="pr-32 block text-sm font-medium text-gray-700">クレジットカード情報</label>
+                                    <div id="card-element" class="mt-1 p-2 border rounded-md"></div>
                                 </div>
-                                <label for="card-element"
-                                    class="pr-32 block text-sm font-medium text-gray-700">クレジットカード情報</label>
-                                <div id="card-element" class="mt-1 p-2 border rounded-md"></div>
-                            </div>
+                            @else
+                            <div class="text-left lg:w-2/3 mt-4" id="payment-section">
+                                    <div id="payment-status" class="hidden text-center mt-4">
+                                        <p id="payment-message"></p>
+                                    </div>
+                                   
+                                    <div id="card-element" class="hidden"></div>
+                                </div>
+                            @endif
                             @if ($isReserved === null)
                                 {{-- 過去のイベントの場合非表示 --}}
                                 @if ($event->eventDate >= \Carbon\Carbon::today()->format('Y年m月d日') || $event->max_people > $participantCount)

@@ -116,3 +116,12 @@ pass123
 admin@admin.com
 pass123
 ```
+## 補足
+### Lineログイン機能 ユーザ登録時
+Line 開発コンソール上でメールアドレス同意を得ないといけないため 
+開発環境emailは以下 $email = Str::random(10) . '@example.com';を入れる
+
+### リマインダー通知
+```bash
+php artisan migrate:fresh --seed
+```

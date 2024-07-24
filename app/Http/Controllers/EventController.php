@@ -31,7 +31,8 @@ class EventController extends Controller
     private const MESSAGES = [
         'SUCCESS' => [
             'STORE_EVENT' => 'イベントを登録しました',
-            'UPDATE_EVENT' => 'イベントを更新しました'
+            'UPDATE_EVENT' => 'イベントを更新しました',
+            'JOIN_EVENT' => 'イベントに参加しました'
         ],
         'ERROR' => [
             'OVER_CAPACITY' => '定員オーバーです 登録できませんでした'
@@ -265,7 +266,7 @@ class EventController extends Controller
             // イベントが参加可能且つ、リクエスト参加人数が参加可能人数以下の場合、登録
             if ($reservablePeople > 0 && $reservablePeople >= $request['number_of_people']) {
                 // チケット購入手続き
-                TicketPurchaseService::createPaymentIntent($request, $event);
+                $paymentIntent =  TicketPurchaseService::createPaymentIntent($request, $event);
                 
             } else {
                 // 定員オーバーの場合、登録しない
@@ -279,10 +280,18 @@ class EventController extends Controller
             $paymentIntent = TicketPurchaseService::createPaymentIntent($request, $event);
             
         }
+        if(!is_null($paymentIntent)) {
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret,
+            ]);
 
-        return response()->json([
-            'clientSecret' => $paymentIntent->client_secret,
-        ]);
+        }
+            else {
+            return response()->json([
+                'clientSecret' => null,
+            ]);
+            }
+        
     }
     /**
      * 支払い履歴登録
