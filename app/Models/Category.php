@@ -102,6 +102,7 @@ class Category extends Model
                 ->orderBy('events.start_at', 'asc')
                 ->select('events.*', 'participants.number_of_people', 'likes.like_count', 'comments.comment_count'); 
         }, 'events.location'])
+        ->where('is_public', true)
         ->paginate(10);
 
 

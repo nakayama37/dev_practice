@@ -377,7 +377,9 @@ class Event extends Model
         ->groupBy('event_id');
 
         // イベントを取得
-        $events = Event::with(['categories', 'location'])
+        $events = Event::with(['categories' => function ($query) {
+            $query->where('is_public', true);
+        }, 'location'])
         ->leftJoinSub($likes, 'likes', function ($join) {
             $join->on('events.id', '=', 'likes.event_id');
         })
