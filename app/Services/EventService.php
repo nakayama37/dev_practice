@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Participant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use App\Mail\EventRegistrationConfirmation;
 use App\Services\EticketService;
 
@@ -30,24 +31,31 @@ class EventService
   public static function join($user, $request, $event, $ticketSale) 
   {
 
-      $participantModel = new Participant();
+    // トランザクションを開始
+    DB::beginTransaction();
+    try {
       // // イベント参加の作成
+      $participantModel = new Participant();
       $joined = $participantModel->joinEvent($user->id, $request);
 
       if (!$joined) {
         // イベントには既に参加済みの場合
-        session()->flash('status', 'このイベントは参加済みです');
-
-        return to_route('home');
+        return;
       }
-
       // Eチケット生成
       $qrCodePath = EticketService::createEticket($ticketSale, $user->id);
-    
+
       // 確認メール送信
       Mail::to($user->email)->send(new EventRegistrationConfirmation($event, $user, $qrCodePath));
+      // トランザクションをコミット
+      DB::commit();
 
-      // 登録成功のセッション
-      session()->flash('status', 'イベント参加登録が完了し、確認メールを送信しました');  
+    } catch (\Exception $e) {
+
+      // エラーが発生した場合はロールバック
+      DB::rollBack();
+      
+      }
+     
   }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\TicketSale;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -31,15 +32,33 @@ class TicketPurchaseService
     } else {
       // StripeのAPIキーを設定
       Stripe::setApiKey(config('services.stripe.secret'));
-  
-      // PaymentIntentを作成
-      $paymentIntent = PaymentIntent::create([
-        'amount' => $totalAmount, 
-        'currency' => 'jpy',
-        'payment_method_types' => ['card'],
-      ]);
 
-      return $paymentIntent;
+      // トランザクションを開始
+      DB::beginTransaction();
+
+      try {
+        // PaymentIntentを作成
+        $paymentIntent = PaymentIntent::create([
+          'amount' => $totalAmount, 
+          'currency' => 'jpy',
+          'payment_method_types' => ['card'],
+        ]);
+        // トランザクションをコミット
+        DB::commit();
+        
+        return $paymentIntent;
+
+      } catch (\Exception $e) {
+
+        // エラーが発生した場合はロールバック
+        DB::rollBack();
+
+        $paymentIntent = 'error';
+
+        return $paymentIntent;
+
+      }
+
 
     }
 

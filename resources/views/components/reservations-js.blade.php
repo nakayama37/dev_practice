@@ -213,20 +213,27 @@
                 });
 
                 const data = await response.json();
+                if(data.status == 'success') {
 
-                if (data.clientSecret) {
-                    await handlePayment(data.clientSecret);
-                } else {
-                    await handleCompletion(null);
+                    // 有料のイベント
+                    if (data.clientSecret) {
+                        await handlePayment(data.clientSecret);
+                    } else {
+                        // 無料のイベント
+                        await handleCompletion(null);
+                    }
+
+                } else if(data.status == 'error') {
+                     setUIState(false, '支払い処理中にエラーが発生しました。');
                 }
-            } catch (error) {
+
+                } catch (error) {
                 setUIState(false, '支払い処理中にエラーが発生しました。');
-                console.error(error);
             }
         });
 
         async function handlePayment(clientSecret) {
-            console.log('start pay');
+            
             const paymentIntent = await stripe.confirmCardPayment(clientSecret, {
                 payment_method: {
                     card: cardElement,
@@ -245,26 +252,22 @@
         }
 
         async function handleCompletion(paymentIntentId) {
-            console.log('start completion');
-            const response = await fetch('/complete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-                body: JSON.stringify({
-                    event_id: document.querySelector('#event_id').value,
-                    quantity: document.querySelector('#number_of_people').value,
-                    payment_intent_id: paymentIntentId,
-                }),
-            });
+                const response = await fetch('/complete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({
+                        event_id: document.querySelector('#event_id').value,
+                        quantity: document.querySelector('#number_of_people').value,
+                        payment_intent_id: paymentIntentId,
+                    }),
+                });
 
-            const result = await response.json();
-            setUIState(true, paymentIntentId ? '支払いが完了し、チケットを購入しました。メールをご確認ください' : '支払い処理中にエラーが発生しました。');
+                const result = await response.json();
+                setUIState(true, result.message);
 
-            if (!paymentIntentId) {
-                setUIState(true, 'イベントに参加しました。メールをご確認ください')
-            }
         }
 
         function setUIState(disableButton, message) {

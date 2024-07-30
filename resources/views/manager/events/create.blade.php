@@ -11,7 +11,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="max-w-2xl mx-auto">
                         <!-- エラーメッセージ -->
-                        <x-error-message />
+                        <x-session-error-message :message="session('error')"/>
 
                         <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
                             @csrf

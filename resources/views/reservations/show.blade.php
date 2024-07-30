@@ -13,8 +13,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <!-- エラーメッセージ -->
-                    <x-error-message />
-
+                    <x-session-error-message :message="session('error')"/>
                     <section class="text-gray-600 body-font">
                         <div class="container mx-auto flex px-5 py-12 items-center justify-center flex-col">
                             @if (is_null($event->image))
