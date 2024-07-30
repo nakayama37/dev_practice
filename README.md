@@ -123,5 +123,5 @@ Line 開発コンソール上でメールアドレス同意を得ないといけ
 
 ### リマインダー通知
 ```bash
-php artisan migrate:fresh --seed
+php artisan events:send-reminders
 ```
