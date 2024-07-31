@@ -18,7 +18,6 @@ use App\Models\Participant;
 use App\Services\EventService;
 use App\Services\ImageService;
 use App\Services\TicketPurchaseService;
-use App\Services\EticketService;
 
 
 
@@ -38,6 +37,7 @@ class EventController extends Controller
         ],
         'ERROR' => [
             'STORE_EVENT' => '登録できませんでした',
+            'UPDATE_EVENT' => '更新できませんでした',
             'PAYMENT' => '支払い・登録できませんでした',
             'OVER_CAPACITY' => '定員オーバーです 登録できませんでした'
         ]
@@ -423,11 +423,6 @@ class EventController extends Controller
         DB::beginTransaction();
         try {
 
-            // 主催者登録
-            $userModel = new User();
-            $user = User::findOrFail($userId);
-            $userModel->joinManager($user);
-
             // 日付と時間を結合
             $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
             $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
@@ -543,32 +538,53 @@ class EventController extends Controller
 
         $imageFile = $request->file('image');
         $fileNameToStore = null;
-        // 日付と時間を結合
-        $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
-        $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
 
-        // 画像の編集
-        $fileNameToStore = $this->storeImage($imageFile, $event, 'update');
+        // トランザクションを開始
+        DB::beginTransaction();
 
-        // イベントの編集
-        $eventModel = new Event();
-        $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate, $fileNameToStore);
+        try {
+            // 日付と時間を結合
+            $startDate = EventService::joinDateAndTime($request['event_date'], $request['start_at']);
+            $endDate = EventService::joinDateAndTime($request['event_date'], $request['end_at']);
+    
+            // 画像の編集
+            $fileNameToStore = $this->storeImage($imageFile, $event, 'update');
+    
+            // イベントの編集
+            $eventModel = new Event();
+            $eventModel->updateEvent($request, $event, $user_id, $startDate, $endDate, $fileNameToStore);
+    
+            // カテゴリ編集
+            $event->categories()->sync($request['categories']);
+    
+            // 場所編集
+            $locationModel = new Location();
+            $locationModel->updateEventLocation($event, $request);
+    
+            // イベントチケット編集
+            $ticketModel = new Ticket();
+            $ticketModel->updateTicket($event, $request);
 
-        // カテゴリ編集
-        $event->categories()->sync($request['categories']);
+            // トランザクションをコミット
+            DB::commit();
 
-        // 場所編集
-        $locationModel = new Location();
-        $locationModel->updateEventLocation($event, $request);
+            // 登録成功のセッション
+            session()->flash('status', self::MESSAGES['SUCCESS']['UPDATE_EVENT']);
+    
+            return to_route('events.index');
 
-        // イベントチケット編集
-        $ticketModel = new Ticket();
-        $ticketModel->updateTicket($event, $request);
+        } catch (\Exception $e) {
+            // エラーが発生した場合はロールバック
+            DB::rollBack();
 
-        // 登録成功のセッション
-        session()->flash('status', self::MESSAGES['SUCCESS']['UPDATE_EVENT']);
+            // エラーメッセージをセッションに追加
+            session()->flash('error', self::MESSAGES['ERROR']['UPDATE_EVENT']);
 
-        return to_route('events.index');
+            // エラーログを記録
+            \Log::error($e->getMessage());
+
+            return back()->withInput();
+        }
     }
 
     /**
